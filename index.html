@@ -40,6 +40,7 @@
     }
 
     .gallery-item {
+      position: relative;
       width: 220px;
       text-align: center;
       cursor: pointer;
@@ -65,6 +66,23 @@
       padding: 5px 10px;
       border-radius: 20px;
       font-size: 0.9em;
+    }
+
+    /* ダウンロードボタン */
+    .download-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.8em;
+      cursor: pointer;
+      user-select: none;
+    }
+    .download-btn:hover {
+      background: rgba(0,0,0,0.8);
     }
 
     /* モーダル */
@@ -119,11 +137,11 @@
     // CSVを読み込む関数
     async function loadCSV() {
       try {
-        const response = await fetch("data.csv"); // 同じフォルダにあるCSVを読み込む
+        const response = await fetch("data.csv");
         if (!response.ok) throw new Error("CSVファイルが見つかりません。");
         const data = await response.text();
 
-        const lines = data.trim().split("\n").slice(1); // ヘッダーを除外
+        const lines = data.trim().split("\n").slice(1);
         images = lines.map(line => {
           const [file, tag] = line.split(",");
           return { file: file.trim(), tag: tag.trim() };
@@ -148,16 +166,35 @@
       filtered.forEach(img => {
         const item = document.createElement("div");
         item.className = "gallery-item";
+
         item.innerHTML = `
           <img src="${img.file}" alt="${img.tag}">
           <div class="tag">${img.tag}</div>
+          <div class="download-btn">⬇</div>
         `;
+
         gallery.appendChild(item);
 
-        item.onclick = () => {
+        // 画像クリック → モーダル表示
+        item.querySelector("img").onclick = () => {
           modalImg.src = img.file;
           modalTag.textContent = img.tag;
           modal.style.display = "flex";
+        };
+
+        // ダウンロードボタン
+        const dlBtn = item.querySelector(".download-btn");
+        dlBtn.onclick = (e) => {
+          e.stopPropagation();
+
+          if (confirm("この画像をダウンロードしますか？")) {
+            const a = document.createElement("a");
+            a.href = img.file;
+            a.download = img.file.split("/").pop();
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }
         };
       });
     }
