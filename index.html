@@ -19,6 +19,7 @@
       font-size: 1.6em;
       letter-spacing: 2px;
     }
+    
 
     #searchBox {
       margin: 20px;
@@ -114,6 +115,12 @@
 </head>
 <body>
   <header>まちフォト</header>
+ <!-- 画像アップロードフォーム -->
+<div style="margin: 20px;">
+  <input type="file" id="fileInput">
+  <button id="uploadBtn">アップロード</button>
+</div>
+
 
   <input type="text" id="searchBox" placeholder="検索">
 
@@ -127,6 +134,22 @@
   </div>
 
   <script>
+    　<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "あなたのAPIキー",
+    authDomain: "machi-photo.firebaseapp.com",
+    projectId: "machi-photo",
+    storageBucket: "machi-photo.firebasestorage.app",
+    messagingSenderId: "あなたのID",
+    appId: "あなたのAppID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const storage = getStorage(app);
+
     const gallery = document.querySelector(".gallery");
     const modal = document.getElementById("modal");
     const modalImg = modal.querySelector("img");
@@ -136,6 +159,35 @@
 
     // CSVを読み込む関数
     async function loadCSV() {
+        // 画像アップロード処理
+  const fileInput = document.getElementById("fileInput");
+  const uploadBtn = document.getElementById("uploadBtn");
+
+  uploadBtn.addEventListener("click", async () => {
+    const file = fileInput.files[0];
+    if (!file) {
+      alert("ファイルを選択してください");
+      return;
+    }
+
+    // Firebase Storage の保存先
+    const storageRef = ref(storage, "uploads/" + file.name);
+
+    try {
+      // アップロード実行
+      await uploadBytes(storageRef, file);
+
+      // ダウンロードURL取得
+      const url = await getDownloadURL(storageRef);
+
+      alert("アップロード完了！\nURL: " + url);
+
+      // ★必要なら CSV や Firestore に URL を保存する処理をここに書く
+    } catch (error) {
+      alert("アップロードに失敗しました: " + error.message);
+    }
+  });
+
       try {
         const response = await fetch("data.csv");
         if (!response.ok) throw new Error("CSVファイルが見つかりません。");
@@ -208,9 +260,11 @@
     modal.onclick = () => {
       modal.style.display = "none";
     };
+  
 
     // 初期ロード
     loadCSV();
   </script>
 </body>
 </html>
+
