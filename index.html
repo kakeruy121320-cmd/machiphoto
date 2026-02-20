@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>まちフォト（CSV対応）</title>
+  <title>まちフォト（投稿機能つき）</title>
+
   <style>
     body {
       font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
@@ -19,7 +20,6 @@
       font-size: 1.6em;
       letter-spacing: 2px;
     }
-    
 
     #searchBox {
       margin: 20px;
@@ -69,7 +69,6 @@
       font-size: 0.9em;
     }
 
-    /* ダウンロードボタン */
     .download-btn {
       position: absolute;
       bottom: 8px;
@@ -82,11 +81,7 @@
       cursor: pointer;
       user-select: none;
     }
-    .download-btn:hover {
-      background: rgba(0,0,0,0.8);
-    }
 
-    /* モーダル */
     .modal {
       display: none;
       position: fixed;
@@ -113,14 +108,16 @@
     }
   </style>
 </head>
+
 <body>
   <header>まちフォト</header>
- <!-- 画像アップロードフォーム -->
-<div style="margin: 20px;">
-  <input type="file" id="fileInput">
-  <button id="uploadBtn">アップロード</button>
-</div>
 
+  <!-- ★ 投稿フォーム（画像＋タグ） -->
+  <div style="margin: 20px;">
+    <input type="file" id="fileInput"><br><br>
+    <input type="text" id="tagInput" placeholder="タグを入力（例：札幌）" style="padding:8px; width:200px;">
+    <button id="uploadBtn">アップロード</button>
+  </div>
 
   <input type="text" id="searchBox" placeholder="検索">
 
@@ -133,22 +130,25 @@
     </div>
   </div>
 
-  <script>
-    　<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  <!-- ★ Firebase SDK & 投稿機能 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "あなたのAPIキー",
-    authDomain: "machi-photo.firebaseapp.com",
-    projectId: "machi-photo",
-    storageBucket: "machi-photo.firebasestorage.app",
-    messagingSenderId: "あなたのID",
-    appId: "あなたのAppID"
-  };
+    // ★ あなたの Firebase 設定をここに貼る
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "machi-photo.firebaseapp.com",
+      projectId: "machi-photo",
+      storageBucket: "machi-photo.firebasestorage.app",
+      messagingSenderId: "YOUR_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const storage = getStorage(app);
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+    const db = getFirestore(app);
 
     const gallery = document.querySelector(".gallery");
     const modal = document.getElementById("modal");
@@ -157,37 +157,8 @@
     const searchBox = document.getElementById("searchBox");
     let images = [];
 
-    // CSVを読み込む関数
+    // CSV 読み込み
     async function loadCSV() {
-        // 画像アップロード処理
-  const fileInput = document.getElementById("fileInput");
-  const uploadBtn = document.getElementById("uploadBtn");
-
-  uploadBtn.addEventListener("click", async () => {
-    const file = fileInput.files[0];
-    if (!file) {
-      alert("ファイルを選択してください");
-      return;
-    }
-
-    // Firebase Storage の保存先
-    const storageRef = ref(storage, "uploads/" + file.name);
-
-    try {
-      // アップロード実行
-      await uploadBytes(storageRef, file);
-
-      // ダウンロードURL取得
-      const url = await getDownloadURL(storageRef);
-
-      alert("アップロード完了！\nURL: " + url);
-
-      // ★必要なら CSV や Firestore に URL を保存する処理をここに書く
-    } catch (error) {
-      alert("アップロードに失敗しました: " + error.message);
-    }
-  });
-
       try {
         const response = await fetch("data.csv");
         if (!response.ok) throw new Error("CSVファイルが見つかりません。");
@@ -227,44 +198,69 @@
 
         gallery.appendChild(item);
 
-        // 画像クリック → モーダル表示
         item.querySelector("img").onclick = () => {
           modalImg.src = img.file;
           modalTag.textContent = img.tag;
           modal.style.display = "flex";
         };
 
-        // ダウンロードボタン
         const dlBtn = item.querySelector(".download-btn");
         dlBtn.onclick = (e) => {
           e.stopPropagation();
-
-          if (confirm("この画像をダウンロードしますか？")) {
-            const a = document.createElement("a");
-            a.href = img.file;
-            a.download = img.file.split("/").pop();
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }
+          const a = document.createElement("a");
+          a.href = img.file;
+          a.download = img.file.split("/").pop();
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
         };
       });
     }
 
-    // 検索イベント
     searchBox.addEventListener("input", e => {
       renderGallery(e.target.value);
     });
 
-    // モーダル閉じる
     modal.onclick = () => {
       modal.style.display = "none";
     };
-  
 
-    // 初期ロード
+    // ★ 投稿処理（画像＋タグ）
+    const fileInput = document.getElementById("fileInput");
+    const tagInput = document.getElementById("tagInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+
+    uploadBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      const tag = tagInput.value.trim();
+
+      if (!file) return alert("ファイルを選択してください");
+      if (!tag) return alert("タグを入力してください");
+
+      const storageRef = ref(storage, "uploads/" + file.name);
+
+      try {
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+
+        // Firestore に保存
+        await addDoc(collection(db, "photos"), {
+          file: url,
+          tag: tag,
+          createdAt: new Date()
+        });
+
+        alert("アップロード完了！");
+
+        fileInput.value = "";
+        tagInput.value = "";
+
+      } catch (error) {
+        alert("アップロードに失敗しました: " + error.message);
+      }
+    });
+
     loadCSV();
   </script>
 </body>
 </html>
-
