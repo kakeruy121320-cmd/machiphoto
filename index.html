@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>まちフォト（投稿機能つき）</title>
+  <title>まちフォト（完全版）</title>
 
   <style>
     body {
@@ -82,6 +82,18 @@
       user-select: none;
     }
 
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: red;
+      color: white;
+      padding: 4px 6px;
+      border-radius: 6px;
+      font-size: 0.8em;
+      cursor: pointer;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -112,7 +124,14 @@
 <body>
   <header>まちフォト</header>
 
-  <!-- ★ 投稿フォーム（画像＋タグ） -->
+  <!-- ログイン -->
+  <div style="margin: 20px;">
+    <button id="loginBtn">Googleでログイン</button>
+    <button id="logoutBtn" style="display:none;">ログアウト</button>
+    <p id="userStatus">ログインしていません</p>
+  </div>
+
+  <!-- 投稿フォーム -->
   <div style="margin: 20px;">
     <input type="file" id="fileInput"><br><br>
     <input type="text" id="tagInput" placeholder="タグを入力（例：札幌）" style="padding:8px; width:200px;">
@@ -130,13 +149,15 @@
     </div>
   </div>
 
-  <!-- ★ Firebase SDK & 投稿機能 -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } 
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // ★ あなたの Firebase 設定をここに貼る
+    // ★ あなたの Firebase 設定を貼る
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "machi-photo.firebaseapp.com",
@@ -149,6 +170,8 @@
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     const gallery = document.querySelector(".gallery");
     const modal = document.getElementById("modal");
@@ -157,23 +180,38 @@
     const searchBox = document.getElementById("searchBox");
     let images = [];
 
-    // CSV 読み込み
-    async function loadCSV() {
-      try {
-        const response = await fetch("data.csv");
-        if (!response.ok) throw new Error("CSVファイルが見つかりません。");
-        const data = await response.text();
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userStatus = document.getElementById("userStatus");
 
-        const lines = data.trim().split("\n").slice(1);
-        images = lines.map(line => {
-          const [file, tag] = line.split(",");
-          return { file: file.trim(), tag: tag.trim() };
-        });
+    // ログイン
+    loginBtn.onclick = () => signInWithPopup(auth, provider);
+    logoutBtn.onclick = () => signOut(auth);
 
-        renderGallery();
-      } catch (error) {
-        gallery.innerHTML = `<p style="color:red;">CSVの読み込みに失敗しました。<br>${error.message}</p>`;
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        userStatus.textContent = `ログイン中：${user.displayName}`;
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+      } else {
+        userStatus.textContent = "ログインしていません";
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
       }
+      loadPhotos();
+    });
+
+    // Firestore 読み込み
+    async function loadPhotos() {
+      images = [];
+      const querySnapshot = await getDocs(collection(db, "photos"));
+      querySnapshot.forEach(docSnap => {
+        images.push({
+          ...docSnap.data(),
+          docId: docSnap.id
+        });
+      });
+      renderGallery();
     }
 
     // ギャラリー描画
@@ -194,19 +232,34 @@
           <img src="${img.file}" alt="${img.tag}">
           <div class="tag">${img.tag}</div>
           <div class="download-btn">⬇</div>
+          ${auth.currentUser && auth.currentUser.uid === img.userId
+            ? `<div class="delete-btn">削除</div>`
+            : ""
+          }
         `;
 
         gallery.appendChild(item);
 
+        // モーダル
         item.querySelector("img").onclick = () => {
           modalImg.src = img.file;
           modalTag.textContent = img.tag;
           modal.style.display = "flex";
         };
 
-        const dlBtn = item.querySelector(".download-btn");
-        dlBtn.onclick = (e) => {
+        // ダウンロード
+        item.querySelector(".download-btn").onclick = async (e) => {
           e.stopPropagation();
+
+          // ダウンロードログ
+          if (auth.currentUser) {
+            await addDoc(collection(db, "downloads"), {
+              file: img.file,
+              userId: auth.currentUser.uid,
+              downloadedAt: new Date()
+            });
+          }
+
           const a = document.createElement("a");
           a.href = img.file;
           a.download = img.file.split("/").pop();
@@ -214,6 +267,29 @@
           a.click();
           document.body.removeChild(a);
         };
+
+        // 削除
+        const deleteBtn = item.querySelector(".delete-btn");
+        if (deleteBtn) {
+          deleteBtn.onclick = async (e) => {
+            e.stopPropagation();
+            if (!confirm("削除しますか？")) return;
+
+            try {
+              // Storage 削除
+              const fileRef = ref(storage, img.file);
+              await deleteObject(fileRef);
+
+              // Firestore 削除
+              await deleteDoc(doc(db, "photos", img.docId));
+
+              alert("削除しました");
+              loadPhotos();
+            } catch (error) {
+              alert("削除に失敗しました: " + error.message);
+            }
+          };
+        }
       });
     }
 
@@ -225,7 +301,7 @@
       modal.style.display = "none";
     };
 
-    // ★ 投稿処理（画像＋タグ）
+    // 投稿処理
     const fileInput = document.getElementById("fileInput");
     const tagInput = document.getElementById("tagInput");
     const uploadBtn = document.getElementById("uploadBtn");
@@ -234,6 +310,7 @@
       const file = fileInput.files[0];
       const tag = tagInput.value.trim();
 
+      if (!auth.currentUser) return alert("投稿にはログインが必要です");
       if (!file) return alert("ファイルを選択してください");
       if (!tag) return alert("タグを入力してください");
 
@@ -243,24 +320,23 @@
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);
 
-        // Firestore に保存
         await addDoc(collection(db, "photos"), {
           file: url,
           tag: tag,
+          userId: auth.currentUser.uid,
           createdAt: new Date()
         });
 
         alert("アップロード完了！");
-
         fileInput.value = "";
         tagInput.value = "";
 
+        loadPhotos();
       } catch (error) {
         alert("アップロードに失敗しました: " + error.message);
       }
     });
 
-    loadCSV();
   </script>
 </body>
 </html>
