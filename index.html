@@ -242,7 +242,7 @@
           modal.style.display = "flex";
         };
 
-       item.querySelector(".download-btn").onclick = async (e) => {
+      item.querySelector(".download-btn").onclick = async (e) => {
   e.stopPropagation();
 
   if (!auth.currentUser) {
@@ -258,45 +258,31 @@
     downloadedAt: new Date()
   });
 
-  // XMLHttpRequest を使って Blob を取得
-  const xhr = new XMLHttpRequest();
-  xhr.open("GET", img.file, true);
-  xhr.responseType = "blob";
+  try {
+    // Firebase Storage SDK を使って Blob を取得
+    const fileRef = ref(storage, img.file);
+    const blob = await getBlob(fileRef);
 
-  xhr.onload = function () {
-    if (xhr.status === 200) {
-      const blob = xhr.response;
-      const url = URL.createObjectURL(blob);
+    // ダウンロード用 URL を作成
+    const url = URL.createObjectURL(blob);
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = img.file.split("/").pop();
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = img.file.split("/").pop();
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-      URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
 
-      setTimeout(() => {
-        alert("ダウンロードしました");
-      }, 500);
-    } else {
-      alert("ダウンロードに失敗しました");
-    }
-  };
+    setTimeout(() => {
+      alert("ダウンロードしました");
+    }, 500);
 
-  xhr.onerror = function () {
-    alert("ダウンロード中にエラーが発生しました");
-  };
-
-  xhr.send();
-};
-
-  xhr.onerror = function () {
-    alert("ダウンロード中にエラーが発生しました");
-  };
-
-  xhr.send();
+  } catch (error) {
+    console.error(error);
+    alert("ダウンロードに失敗しました");
+  }
 };
 
 
@@ -373,5 +359,6 @@
   </script>
 </body>
 </html>
+
 
 
