@@ -252,11 +252,37 @@
           e.stopPropagation();
 
           // ダウンロードログ
-          if (auth.currentUser) {
-            await addDoc(collection(db, "downloads"), {
-              file: img.file,
-              userId: auth.currentUser.uid,
-              downloadedAt: new Date()
+          item.querySelector(".download-btn").onclick = async (e) => {
+  e.stopPropagation();
+
+  // ログインチェック
+  if (!auth.currentUser) {
+    alert("ダウンロードするにはログインが必要です");
+    signInWithPopup(auth, provider);
+    return;
+  }
+
+  // Firestore にダウンロードログを保存
+  await addDoc(collection(db, "downloads"), {
+    file: img.file,
+    userId: auth.currentUser.uid,
+    downloadedAt: new Date()
+  });
+
+  // ダウンロード処理（保存場所選択ダイアログが出る）
+  const a = document.createElement("a");
+  a.href = img.file;
+  a.download = img.file.split("/").pop(); // ← これが保存ダイアログを出す
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // ダウンロード完了メッセージ
+  setTimeout(() => {
+    alert("ダウンロードしました");
+  }, 500);
+};
+
             });
           }
 
@@ -307,38 +333,46 @@
     const uploadBtn = document.getElementById("uploadBtn");
 
     uploadBtn.addEventListener("click", async () => {
-      const file = fileInput.files[0];
-      const tag = tagInput.value.trim();
+      
+      uploadBtn.addEventListener("click", async () => {
+  if (!auth.currentUser) {
+    alert("投稿するにはログインが必要です");
+    signInWithPopup(auth, provider);
+    return;
+  }
 
-      if (!auth.currentUser) return alert("投稿にはログインが必要です");
-      if (!file) return alert("ファイルを選択してください");
-      if (!tag) return alert("タグを入力してください");
+  const file = fileInput.files[0];
+  const tag = tagInput.value.trim();
 
-      const storageRef = ref(storage, "uploads/" + file.name);
+  if (!file) return alert("ファイルを選択してください");
+  if (!tag) return alert("タグを入力してください");
 
-      try {
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
+  const storageRef = ref(storage, "uploads/" + file.name);
 
-        await addDoc(collection(db, "photos"), {
-          file: url,
-          tag: tag,
-          userId: auth.currentUser.uid,
-          createdAt: new Date()
-        });
+  try {
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
 
-        alert("アップロード完了！");
-        fileInput.value = "";
-        tagInput.value = "";
-
-        loadPhotos();
-      } catch (error) {
-        alert("アップロードに失敗しました: " + error.message);
-      }
+    await addDoc(collection(db, "photos"), {
+      file: url,
+      tag: tag,
+      userId: auth.currentUser.uid,
+      createdAt: new Date()
     });
+
+    alert("アップロード完了！");
+    fileInput.value = "";
+    tagInput.value = "";
+
+    loadPhotos();
+  } catch (error) {
+    alert("アップロードに失敗しました: " + error.message);
+  }
+});
 
   </script>
 </body>
 </html>
+
 
 
