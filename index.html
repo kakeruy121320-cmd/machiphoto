@@ -252,7 +252,7 @@
           e.stopPropagation();
 
           // ダウンロードログ
-          item.querySelector(".download-btn").onclick = async (e) => {
+         　item.querySelector(".download-btn").onclick = async (e) => {
   e.stopPropagation();
 
   // ログインチェック
@@ -269,15 +269,25 @@
     downloadedAt: new Date()
   });
 
-  // ダウンロード処理（保存場所選択ダイアログが出る）
+  // 画像を Blob として取得
+  const response = await fetch(img.file);
+  const blob = await response.blob();
+
+  // ダウンロード用のURLを作成
+  const url = URL.createObjectURL(blob);
+
+  // ダウンロード処理
   const a = document.createElement("a");
-  a.href = img.file;
-  a.download = img.file.split("/").pop(); // ← これが保存ダイアログを出す
+  a.href = url;
+  a.download = img.file.split("/").pop(); // ファイル名
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
 
-  // ダウンロード完了メッセージ
+  // URLを解放
+  URL.revokeObjectURL(url);
+
+  // 完了メッセージ
   setTimeout(() => {
     alert("ダウンロードしました");
   }, 500);
@@ -373,6 +383,7 @@
   </script>
 </body>
 </html>
+
 
 
 
