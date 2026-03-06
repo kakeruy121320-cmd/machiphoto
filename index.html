@@ -258,7 +258,7 @@
     downloadedAt: new Date()
   });
 
-  // XMLHttpRequest を使って Blob を取得（CORS 回避）
+  // XMLHttpRequest を使って Blob を取得
   const xhr = new XMLHttpRequest();
   xhr.open("GET", img.file, true);
   xhr.responseType = "blob";
@@ -284,6 +284,13 @@
       alert("ダウンロードに失敗しました");
     }
   };
+
+  xhr.onerror = function () {
+    alert("ダウンロード中にエラーが発生しました");
+  };
+
+  xhr.send();
+};
 
   xhr.onerror = function () {
     alert("ダウンロード中にエラーが発生しました");
@@ -366,4 +373,5 @@
   </script>
 </body>
 </html>
+
 
