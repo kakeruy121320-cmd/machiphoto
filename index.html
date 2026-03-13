@@ -274,20 +274,13 @@
   });
 
   try {
-    // 署名付きURLは fetch で直接取得できる
-    const response = await fetch(img.file);
-    const blob = await response.blob();
-
-    const url = URL.createObjectURL(blob);
-
+    // 署名付きURLはそのままダウンロード可能
     const a = document.createElement("a");
-    a.href = url;
-    a.download = img.file.split("/").pop();
+    a.href = img.file;
+    a.download = img.file.split("/").pop(); // ファイル名
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
 
     setTimeout(() => {
       alert("ダウンロードしました");
@@ -298,6 +291,7 @@
     alert("ダウンロードに失敗しました");
   }
 };
+
 
 
         // 削除
@@ -373,4 +367,5 @@
   </script>
 </body>
 </html>
+
 
