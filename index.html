@@ -3,369 +3,213 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>まちフォト（完全版）</title>
-
+  <title>まちフォト（修正版）</title>
   <style>
-    body {
-      font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
-      background: #f8f8f8;
-      margin: 0;
-      text-align: center;
-    }
-
-    header {
-      background: #2196f3;
-      color: white;
-      padding: 20px 0;
-      font-size: 1.6em;
-      letter-spacing: 2px;
-    }
-
-    #searchBox {
-      margin: 20px;
-      padding: 10px 20px;
-      width: 60%;
-      max-width: 400px;
-      border: 2px solid #2196f3;
-      border-radius: 25px;
-      font-size: 1em;
-      outline: none;
-    }
-
-    .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .gallery-item {
-      position: relative;
-      width: 220px;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    img {
-      width: 220px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
-    }
-
-    img:hover {
-      transform: scale(1.05);
-    }
-
-    .tag {
-      margin-top: 8px;
-      background: #eee;
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 0.9em;
-    }
-
-    .download-btn {
-      position: absolute;
-      bottom: 8px;
-      right: 8px;
-      background: rgba(0,0,0,0.6);
-      color: white;
-      padding: 6px 8px;
-      border-radius: 6px;
-      font-size: 0.8em;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .delete-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: red;
-      color: white;
-      padding: 4px 6px;
-      border-radius: 6px;
-      font-size: 0.8em;
-      cursor: pointer;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-
-    .modal img {
-      width: 80%;
-      height: auto;
-      max-width: 900px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255,255,255,0.5);
-    }
-
-    .modal p {
-      color: white;
-      font-size: 1.2em;
-      margin-top: 10px;
-    }
+    /* CSSはそのまま活用（一部調整） */
+    body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #f8f8f8; margin: 0; text-align: center; }
+    header { background: #2196f3; color: white; padding: 20px 0; font-size: 1.6em; letter-spacing: 2px; }
+    #searchBox { margin: 20px; padding: 10px 20px; width: 60%; max-width: 400px; border: 2px solid #2196f3; border-radius: 25px; font-size: 1em; outline: none; }
+    .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+    .gallery-item { position: relative; width: 220px; text-align: center; cursor: pointer; }
+    img { width: 220px; height: 150px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
+    img:hover { transform: scale(1.05); }
+    .tag { margin-top: 8px; background: #eee; display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 0.9em; }
+    .download-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.8em; cursor: pointer; z-index: 10; }
+    .delete-btn { position: absolute; top: 8px; right: 8px; background: #ff5252; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.8em; cursor: pointer; z-index: 10; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 999; flex-direction: column; }
+    .modal img { max-width: 90%; max-height: 80%; border-radius: 8px; }
+    .modal p { color: white; margin-top: 15px; font-size: 1.2em; }
   </style>
 </head>
-
 <body>
-  <header>まちフォト</header>
 
-  <!-- ログイン -->
-  <div style="margin: 20px;">
+<header>まちフォト</header>
+
+<div style="margin: 20px;">
+  <div id="userInfo">
+    <p id="userStatus">読み込み中...</p>
     <button id="loginBtn">Googleでログイン</button>
     <button id="logoutBtn" style="display:none;">ログアウト</button>
-    <p id="userStatus">ログインしていません</p>
   </div>
+</div>
 
-  <!-- 投稿フォーム -->
-  <div style="margin: 20px;">
-    <input type="file" id="fileInput"><br><br>
-    <input type="text" id="tagInput" placeholder="タグを入力（例：札幌）" style="padding:8px; width:200px;">
-    <button id="uploadBtn">アップロード</button>
-  </div>
+<div id="uploadArea" style="margin: 20px; display:none;">
+  <input type="file" id="fileInput" accept="image/*"><br><br>
+  <input type="text" id="tagInput" placeholder="タグ（例：札幌）" style="padding:8px; width:200px;">
+  <button id="uploadBtn">アップロード</button>
+</div>
 
-  <input type="text" id="searchBox" placeholder="検索">
+<input type="text" id="searchBox" placeholder="タグで検索...">
 
-  <div class="gallery"></div>
+<div class="gallery"></div>
 
-  <div class="modal" id="modal">
-    <div>
-      <img src="" alt="">
-      <p id="modalTag"></p>
-    </div>
-  </div>
+<div class="modal" id="modal">
+  <img src="" alt="">
+  <p id="modalTag"></p>
+</div>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-      getStorage, 
-      ref, 
-      uploadBytes, 
-      getDownloadURL, 
-      deleteObject,
-      getBlob,
-      refFromURL
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-    import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      getDocs, 
-      deleteDoc, 
-      doc 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { 
-      getAuth, 
-      signInWithPopup, 
-      GoogleAuthProvider, 
-      signOut, 
-      onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, getBlob } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA905mJ-r1OxzV5n-f7fAC3D0keVV-GwGM",
-      authDomain: "machi-photo.firebaseapp.com",
-      projectId: "machi-photo",
-      storageBucket: "machi-photo.appspot.com",
-      messagingSenderId: "625685667366",
-      appId: "1:625685667366:web:3de33df7fe5bc75ccdd0e7"
-    };
+  // 設定 (ご自身のものを使用)
+  const firebaseConfig = {
+    apiKey: "AIzaSyA905mJ-r1OxzV5n-f7fAC3D0keVV-GwGM",
+    authDomain: "machi-photo.firebaseapp.com",
+    projectId: "machi-photo",
+    storageBucket: "machi-photo.appspot.com",
+    messagingSenderId: "625685667366",
+    appId: "1:625685667366:web:3de33df7fe5bc75ccdd0e7"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const storage = getStorage(app);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+  const app = initializeApp(firebaseConfig);
+  const storage = getStorage(app);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
-    const gallery = document.querySelector(".gallery");
-    const modal = document.getElementById("modal");
-    const modalImg = modal.querySelector("img");
-    const modalTag = document.getElementById("modalTag");
-    const searchBox = document.getElementById("searchBox");
-    let images = [];
+  const gallery = document.querySelector(".gallery");
+  const modal = document.getElementById("modal");
+  const uploadArea = document.getElementById("uploadArea");
+  const searchBox = document.getElementById("searchBox");
+  let images = [];
 
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const userStatus = document.getElementById("userStatus");
-
-    loginBtn.onclick = () => signInWithPopup(auth, provider);
-    logoutBtn.onclick = () => signOut(auth);
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        userStatus.textContent = `ログイン中：${user.displayName}`;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-      } else {
-        userStatus.textContent = "ログインしていません";
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-      }
-      loadPhotos();
-    });
-
-    async function loadPhotos() {
-      images = [];
-      const querySnapshot = await getDocs(collection(db, "photos"));
-      querySnapshot.forEach(docSnap => {
-        images.push({
-          ...docSnap.data(),
-          docId: docSnap.id
-        });
-      });
-      renderGallery();
+  // 認証状態の監視
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      document.getElementById("userStatus").textContent = `ログイン中：${user.displayName}`;
+      document.getElementById("loginBtn").style.display = "none";
+      document.getElementById("logoutBtn").style.display = "inline-block";
+      uploadArea.style.display = "block";
+    } else {
+      document.getElementById("userStatus").textContent = "ログインしていません";
+      document.getElementById("loginBtn").style.display = "inline-block";
+      document.getElementById("logoutBtn").style.display = "none";
+      uploadArea.style.display = "none";
     }
-
-    function renderGallery(filter = "") {
-      gallery.innerHTML = "";
-      const filtered = images.filter(img => img.tag.includes(filter));
-
-      if (filtered.length === 0) {
-        gallery.innerHTML = "<p>該当する画像がありません。</p>";
-        return;
-      }
-
-      filtered.forEach(img => {
-        const item = document.createElement("div");
-        item.className = "gallery-item";
-
-        item.innerHTML = `
-          <img src="${img.file}" alt="${img.tag}">
-          <div class="tag">${img.tag}</div>
-          <div class="download-btn">⬇</div>
-          ${auth.currentUser && auth.currentUser.uid === img.userId
-            ? `<div class="delete-btn">削除</div>`
-            : ""
-          }
-        `;
-
-        gallery.appendChild(item);
-
-        // モーダル
-       item.querySelector(".download-btn").onclick = async (e) => {
-  e.stopPropagation();
-
-  if (!auth.currentUser) {
-    alert("ダウンロードするにはログインが必要です");
-    signInWithPopup(auth, provider);
-    return;
-  }
-
-  // Firestore にダウンロードログを保存
-  await addDoc(collection(db, "downloads"), {
-    file: img.file,
-    userId: auth.currentUser.uid,
-    downloadedAt: new Date()
+    loadPhotos();
   });
 
-  try {
-    // 署名付きURLはそのままダウンロード可能
-    const a = document.createElement("a");
-    a.href = img.file;
-    a.download = img.file.split("/").pop(); // ファイル名
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  document.getElementById("loginBtn").onclick = () => signInWithPopup(auth, provider);
+  document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
-    setTimeout(() => {
-      alert("ダウンロードしました");
-    }, 500);
-
-  } catch (error) {
-    console.error(error);
-    alert("ダウンロードに失敗しました");
+  // 写真の読み込み
+  async function loadPhotos() {
+    images = [];
+    const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(docSnap => {
+      images.push({ ...docSnap.data(), docId: docSnap.id });
+    });
+    renderGallery();
   }
-};
 
+  // ギャラリーの描画
+  function renderGallery(filter = "") {
+    gallery.innerHTML = "";
+    const filtered = images.filter(img => img.tag.includes(filter));
 
-
-        // 削除
-        const deleteBtn = item.querySelector(".delete-btn");
-        if (deleteBtn) {
-          deleteBtn.onclick = async (e) => {
-            e.stopPropagation();
-            if (!confirm("削除しますか？")) return;
-
-            try {
-              const fileRef = refFromURL(img.file);
-              await deleteObject(fileRef);
-              await deleteDoc(doc(db, "photos", img.docId));
-
-              alert("削除しました");
-              loadPhotos();
-            } catch (error) {
-              alert("削除に失敗しました: " + error.message);
-            }
-          };
-        }
-      });
+    if (filtered.length === 0) {
+      gallery.innerHTML = "<p>画像が見つかりません。</p>";
+      return;
     }
 
-    searchBox.addEventListener("input", e => {
-      renderGallery(e.target.value);
-    });
+    filtered.forEach(img => {
+      const item = document.createElement("div");
+      item.className = "gallery-item";
+      
+      const isOwner = auth.currentUser && auth.currentUser.uid === img.userId;
 
-    modal.onclick = () => {
-      modal.style.display = "none";
-    };
+      item.innerHTML = `
+        <img src="${img.file}" alt="${img.tag}" class="thumb">
+        <div class="tag">#${img.tag}</div>
+        <div class="download-btn" title="ダウンロード">⬇</div>
+        ${isOwner ? `<div class="delete-btn">削除</div>` : ""}
+      `;
 
-    const fileInput = document.getElementById("fileInput");
-    const tagInput = document.getElementById("tagInput");
-    const uploadBtn = document.getElementById("uploadBtn");
+      // モーダル表示イベント
+      item.querySelector(".thumb").onclick = () => {
+        modal.querySelector("img").src = img.file;
+        document.getElementById("modalTag").textContent = img.tag;
+        modal.style.display = "flex";
+      };
 
-    uploadBtn.addEventListener("click", async () => {
-      if (!auth.currentUser) {
-        alert("投稿するにはログインが必要です");
-        signInWithPopup(auth, provider);
-        return;
+      // ダウンロード処理
+      item.querySelector(".download-btn").onclick = async (e) => {
+        e.stopPropagation();
+        if (!auth.currentUser) return alert("ダウンロードにはログインが必要です");
+
+        try {
+          const storageRef = ref(storage, img.file);
+          const blob = await getBlob(storageRef);
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `photo_${Date.now()}.jpg`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        } catch (err) {
+          console.error(err);
+          alert("ダウンロードに失敗しました。CORS設定を確認してください。");
+        }
+      };
+
+      // 削除処理
+      if (isOwner) {
+        item.querySelector(".delete-btn").onclick = async (e) => {
+          e.stopPropagation();
+          if (!confirm("本当に削除しますか？")) return;
+          try {
+            const fileRef = ref(storage, img.file);
+            await deleteObject(fileRef);
+            await deleteDoc(doc(db, "photos", img.docId));
+            alert("削除しました");
+            loadPhotos();
+          } catch (error) {
+            alert("削除失敗: " + error.message);
+          }
+        };
       }
 
-      const file = fileInput.files[0];
-      const tag = tagInput.value.trim();
-
-      if (!file) return alert("ファイルを選択してください");
-      if (!tag) return alert("タグを入力してください");
-
-      const storageRef = ref(storage, "uploads/" + file.name);
-
-      try {
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-
-        await addDoc(collection(db, "photos"), {
-          file: url,
-          tag: tag,
-          userId: auth.currentUser.uid,
-          createdAt: new Date()
-        });
-
-        alert("アップロード完了！");
-        fileInput.value = "";
-        tagInput.value = "";
-
-        loadPhotos();
-      } catch (error) {
-        alert("アップロードに失敗しました: " + error.message);
-      }
+      gallery.appendChild(item);
     });
+  }
 
-  </script>
+  // 検索
+  searchBox.addEventListener("input", e => renderGallery(e.target.value));
+
+  // モーダルを閉じる
+  modal.onclick = () => modal.style.display = "none";
+
+  // アップロード
+  document.getElementById("uploadBtn").onclick = async () => {
+    const file = document.getElementById("fileInput").files[0];
+    const tag = document.getElementById("tagInput").value.trim();
+
+    if (!file || !tag) return alert("ファイルとタグを入力してください");
+
+    const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
+    try {
+      const snapshot = await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(snapshot.ref);
+
+      await addDoc(collection(db, "photos"), {
+        file: url,
+        tag: tag,
+        userId: auth.currentUser.uid,
+        createdAt: new Date()
+      });
+
+      alert("アップロード成功！");
+      document.getElementById("fileInput").value = "";
+      document.getElementById("tagInput").value = "";
+      loadPhotos();
+    } catch (error) {
+      alert("アップロード失敗: " + error.message);
+    }
+  };
+</script>
 </body>
 </html>
-
-
