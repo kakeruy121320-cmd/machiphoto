@@ -257,51 +257,48 @@
         gallery.appendChild(item);
 
         // モーダル
-        item.querySelector("img").onclick = () => {
-          modalImg.src = img.file;
-          modalTag.textContent = img.tag;
-          modal.style.display = "flex";
-        };
+       item.querySelector(".download-btn").onclick = async (e) => {
+  e.stopPropagation();
 
-        // ダウンロード
-        item.querySelector(".download-btn").onclick = async (e) => {
-          e.stopPropagation();
+  if (!auth.currentUser) {
+    alert("ダウンロードするにはログインが必要です");
+    signInWithPopup(auth, provider);
+    return;
+  }
 
-          if (!auth.currentUser) {
-            alert("ダウンロードするにはログインが必要です");
-            signInWithPopup(auth, provider);
-            return;
-          }
+  // Firestore にダウンロードログを保存
+  await addDoc(collection(db, "downloads"), {
+    file: img.file,
+    userId: auth.currentUser.uid,
+    downloadedAt: new Date()
+  });
 
-          await addDoc(collection(db, "downloads"), {
-            file: img.file,
-            userId: auth.currentUser.uid,
-            downloadedAt: new Date()
-          });
+  try {
+    // 署名付きURLは fetch で直接取得できる
+    const response = await fetch(img.file);
+    const blob = await response.blob();
 
-          try {
-            const fileRef = refFromURL(img.file);
-            const blob = await getBlob(fileRef);
-            const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
 
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = img.file.split("/").pop();
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = img.file.split("/").pop();
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-            URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
 
-            setTimeout(() => {
-              alert("ダウンロードしました");
-            }, 500);
+    setTimeout(() => {
+      alert("ダウンロードしました");
+    }, 500);
 
-          } catch (error) {
-            console.error(error);
-            alert("ダウンロードに失敗しました");
-          }
-        };
+  } catch (error) {
+    console.error(error);
+    alert("ダウンロードに失敗しました");
+  }
+};
+
 
         // 削除
         const deleteBtn = item.querySelector(".delete-btn");
@@ -376,3 +373,4 @@
   </script>
 </body>
 </html>
+
