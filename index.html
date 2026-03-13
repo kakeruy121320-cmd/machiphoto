@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>まちフォト（修正版）</title>
+  <title>まちフォト（完全修正版）</title>
   <style>
-    /* CSSはそのまま活用（一部調整） */
     body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #f8f8f8; margin: 0; text-align: center; }
     header { background: #2196f3; color: white; padding: 20px 0; font-size: 1.6em; letter-spacing: 2px; }
     #searchBox { margin: 20px; padding: 10px 20px; width: 60%; max-width: 400px; border: 2px solid #2196f3; border-radius: 25px; font-size: 1em; outline: none; }
@@ -14,11 +13,12 @@
     img { width: 220px; height: 150px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
     img:hover { transform: scale(1.05); }
     .tag { margin-top: 8px; background: #eee; display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 0.9em; }
-    .download-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.8em; cursor: pointer; z-index: 10; }
-    .delete-btn { position: absolute; top: 8px; right: 8px; background: #ff5252; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.8em; cursor: pointer; z-index: 10; }
+    .download-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.8em; cursor: pointer; z-index: 5; }
+    .delete-btn { position: absolute; top: 8px; right: 8px; background: #ff5252; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.8em; cursor: pointer; z-index: 5; }
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 999; flex-direction: column; }
     .modal img { max-width: 90%; max-height: 80%; border-radius: 8px; }
     .modal p { color: white; margin-top: 15px; font-size: 1.2em; }
+    .upload-section { background: white; padding: 20px; margin: 20px auto; max-width: 500px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
@@ -27,16 +27,16 @@
 
 <div style="margin: 20px;">
   <div id="userInfo">
-    <p id="userStatus">読み込み中...</p>
+    <p id="userStatus">接続中...</p>
     <button id="loginBtn">Googleでログイン</button>
     <button id="logoutBtn" style="display:none;">ログアウト</button>
   </div>
 </div>
 
-<div id="uploadArea" style="margin: 20px; display:none;">
+<div id="uploadArea" class="upload-section" style="display:none;">
   <input type="file" id="fileInput" accept="image/*"><br><br>
-  <input type="text" id="tagInput" placeholder="タグ（例：札幌）" style="padding:8px; width:200px;">
-  <button id="uploadBtn">アップロード</button>
+  <input type="text" id="tagInput" placeholder="タグ（例：札幌）" style="padding:8px; width:200px; border:1px solid #ccc; border-radius:5px;">
+  <button id="uploadBtn" style="padding:8px 20px; background:#2196f3; color:white; border:none; border-radius:5px; cursor:pointer;">アップロード</button>
 </div>
 
 <input type="text" id="searchBox" placeholder="タグで検索...">
@@ -54,12 +54,12 @@
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-  // 設定 (ご自身のものを使用)
+  // 【修正済み】Firebase設定
   const firebaseConfig = {
     apiKey: "AIzaSyA905mJ-r1OxzV5n-f7fAC3D0keVV-GwGM",
     authDomain: "machi-photo.firebaseapp.com",
     projectId: "machi-photo",
-    storageBucket: "machi-photo.appspot.com",
+    storageBucket: "machi-photo.firebasestorage.app", // .appに変更
     messagingSenderId: "625685667366",
     appId: "1:625685667366:web:3de33df7fe5bc75ccdd0e7"
   };
@@ -98,65 +98,72 @@
   // 写真の読み込み
   async function loadPhotos() {
     images = [];
-    const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(docSnap => {
-      images.push({ ...docSnap.data(), docId: docSnap.id });
-    });
-    renderGallery();
+    try {
+      const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(docSnap => {
+        images.push({ ...docSnap.data(), docId: docSnap.id });
+      });
+      renderGallery();
+    } catch (err) {
+      console.error("データ取得エラー:", err);
+    }
   }
 
-  // ギャラリーの描画
+  // ギャラリー描画
   function renderGallery(filter = "") {
     gallery.innerHTML = "";
     const filtered = images.filter(img => img.tag.includes(filter));
 
     if (filtered.length === 0) {
-      gallery.innerHTML = "<p>画像が見つかりません。</p>";
+      gallery.innerHTML = "<p>写真がありません。</p>";
       return;
     }
 
     filtered.forEach(img => {
       const item = document.createElement("div");
       item.className = "gallery-item";
-      
       const isOwner = auth.currentUser && auth.currentUser.uid === img.userId;
 
       item.innerHTML = `
         <img src="${img.file}" alt="${img.tag}" class="thumb">
         <div class="tag">#${img.tag}</div>
-        <div class="download-btn" title="ダウンロード">⬇</div>
+        <div class="download-btn">保存 ⬇</div>
         ${isOwner ? `<div class="delete-btn">削除</div>` : ""}
       `;
 
-      // モーダル表示イベント
+      // モーダル表示
       item.querySelector(".thumb").onclick = () => {
         modal.querySelector("img").src = img.file;
         document.getElementById("modalTag").textContent = img.tag;
         modal.style.display = "flex";
       };
 
-      // ダウンロード処理
+      // ダウンロード処理（CORS対応版）
       item.querySelector(".download-btn").onclick = async (e) => {
         e.stopPropagation();
         if (!auth.currentUser) return alert("ダウンロードにはログインが必要です");
 
         try {
+          // URLからStorage参照を直接作成
           const storageRef = ref(storage, img.file);
           const blob = await getBlob(storageRef);
           const url = window.URL.createObjectURL(blob);
+          
           const a = document.createElement("a");
           a.href = url;
-          a.download = `photo_${Date.now()}.jpg`;
+          a.download = `${img.tag}_${Date.now()}.jpg`;
+          document.body.appendChild(a);
           a.click();
+          document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
         } catch (err) {
           console.error(err);
-          alert("ダウンロードに失敗しました。CORS設定を確認してください。");
+          alert("ダウンロードに失敗しました。CORS設定が反映されるまで数分かかる場合があります。");
         }
       };
 
-      // 削除処理
+      // 削除
       if (isOwner) {
         item.querySelector(".delete-btn").onclick = async (e) => {
           e.stopPropagation();
@@ -172,15 +179,11 @@
           }
         };
       }
-
       gallery.appendChild(item);
     });
   }
 
-  // 検索
   searchBox.addEventListener("input", e => renderGallery(e.target.value));
-
-  // モーダルを閉じる
   modal.onclick = () => modal.style.display = "none";
 
   // アップロード
