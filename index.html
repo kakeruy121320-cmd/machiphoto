@@ -360,6 +360,13 @@ Cookie を無効にすることは可能ですが、一部機能が利用でき�
   modal.onclick = () => modal.style.display = "none";
 
  document.getElementById("uploadBtn").onclick = async () => {
+   
+   canvas.toBlob(
+  (blob) => resolve(blob),
+  "image/jpeg",
+  quality
+);
+
   const file = document.getElementById("fileInput").files[0];
   const tag = document.getElementById("tagInput").value.trim();
 
