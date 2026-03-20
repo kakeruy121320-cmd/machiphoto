@@ -275,19 +275,33 @@ Cookie を無効にすることは可能ですが、一部機能が利用でき�
         modal.style.display = "flex";
       };
 
+      // ダウンロードボタンの処理
       item.querySelector(".download-btn").onclick = async (e) => {
         e.stopPropagation();
         if (!auth.currentUser) return alert("ダウンロードにはログインが必要です");
 
         try {
+          // 画像をデータとして取得
+          const response = await fetch(img.file);
+          if (!response.ok) throw new Error("取得に失敗しました");
+          
+          const blob = await response.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+
+          // ダウンロード用のリンクを生成
           const a = document.createElement("a");
-          a.href = img.file;
-          a.download = img.file.split("/").pop();
+          a.href = blobUrl;
+          // ファイル名を「タグ名.jpg」にする
+          a.download = `${img.tag || 'photo'}.jpg`; 
           document.body.appendChild(a);
           a.click();
+
+          // 後片付け
           document.body.removeChild(a);
+          window.URL.revokeObjectURL(blobUrl);
         } catch (err) {
-          alert("ダウンロードに失敗しました");
+          console.error(err);
+          alert("ダウンロードに失敗しました。CORS設定を確認してください。");
         }
       };
 
