@@ -108,22 +108,58 @@
 
 <div id="termsModal" class="simplified-modal">
   <div id="termsModalContent" class="simplified-modal-content">
-    <h2>利用規約・プライバシーポリシー</h2>
-    <div class="content">
-      <p>本サービスの利用には、以下の規約に同意いただく必要があります。</p>
+   <div id="termsBox">
+  <h2>利用規約およびプライバシーポリシー</h2>
+  <div style="height:350px; overflow-y:auto; border:1px solid #eee; padding:15px; font-size: 0.85em; line-height: 1.7; background: #fafafa; color: #333;">
+    
+    <section>
+      <h3 style="border-left: 4px solid #2196f3; padding-left: 8px;">【第1部：利用規約】</h3>
+      <p><strong>第1条（適用・同意）</strong><br>
+      本規約は「まちフォト」（以下「本サービス」）の利用条件を定めるものです。ユーザーは、Googleログイン等を用いて本サービスを利用した時点で、本規約の全ての条項に同意したものとみなされます。</p>
+
+      <p><strong>第2条（禁止事項）</strong><br>
+      ユーザーは、以下の内容を含む投稿を行ってはなりません。
       <ul>
-        <li>他人の肖像権、著作権を侵害しないこと</li>
-        <li>個人情報を投稿しないこと</li>
-        <li>公序良俗に反する行為を行わないこと</li>
-        <li>その他、運営者が不適切と判断する行為を行わないこと</li>
-      </ul>
-      <p>詳細は、別途利用規約ページをご確認ください。</p>
-    </div>
-    <div class="action-area">
-      <button id="closeTermsBtn" class="action-btn gray-btn">閉じる</button>
-      <button id="agreeBtn" class="action-btn blue-btn">同意してログイン</button>
-    </div>
+        <li>他者の肖像権、著作権、プライバシー権を侵害するもの（許可のない他人の顔写真等）</li>
+        <li>虚偽の内容、または公序良俗に反するもの</li>
+        <li>個人情報（住所、電話番号等）が特定可能な状態で写り込んでいるもの</li>
+        <li>本サービスの運営を妨げ、またはサーバーに過度な負荷をかける行為</li>
+      </ul></p>
+
+      <p><strong>第3条（投稿データの権利と責任）</strong><br>
+      1. 投稿された画像の著作権は投稿者に帰属します。<br>
+      2. 投稿者は、運営者に対し、本サービスの提供・広告宣伝・改善に必要な範囲で、投稿データを無償かつ非独占的に利用（複製・改変等）することを許諾するものとします。<br>
+      3. 投稿内容に関するトラブル（著作権侵害や肖像権侵害等）は、投稿者の責任と費用で解決するものとし、運営者は一切の責任を負いません。</p>
+
+      <p><strong>第4条（免責事項）</strong><br>
+      1. 運営者は、本サービスの中断、データの消失、または利用により生じた損害について、故意または重過失がある場合を除き、一切の責任を負いません。<br>
+      2. 投稿データのバックアップはユーザー自身の責任で行ってください。</p>
+    </section>
+
+    <section style="margin-top: 20px;">
+      <h3 style="border-left: 4px solid #4caf50; padding-left: 8px;">【第2部：プライバシーポリシー】</h3>
+      <p><strong>1. 取得する情報</strong><br>
+      本サービスは、Google認証を介して提供されるプロフィール情報（氏名、メールアドレス、アイコン画像）および投稿された画像・タグ、Cookie情報を取得します。</p>
+
+      <p><strong>2. 利用目的</strong><br>
+      取得した情報は、ユーザー認証、投稿管理、お問い合わせ対応、およびサービスの利用状況分析のためにのみ利用します。</p>
+
+      <p><strong>3. データの保管</strong><br>
+      本サービスはGoogle Firebaseを利用しており、データはGoogleのサーバー（米国を含む）にて管理されます。ユーザーが退会またはデータの削除を希望する場合、本サービス上の機能を用いて削除することができます。</p>
+
+      <p><strong>4. 第三者提供の制限</strong><br>
+      法令に基づく場合を除き、取得した個人情報をユーザーの同意なく第三者に提供することはありません。</p>
+
+      <p><strong>5. 相談窓口</strong><br>
+      個人情報に関するお問い合わせは、[連絡先メールアドレスまたはフォームURL] までご連絡ください。</p>
+    </section>
+
   </div>
+  <div style="margin-top:20px; text-align:center;">
+    <button id="agreeBtn" style="padding:12px 30px; background:#2196f3; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">同意して利用を開始する</button>
+    <button id="closeTermsBtn" style="padding:12px 20px; margin-left:10px; border:none; border-radius:5px; cursor:pointer; background:#ccc;">同意しない</button>
+  </div>
+</div>
 </div>
 
 <div id="detailModal" class="simplified-modal">
