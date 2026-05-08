@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>まちフォト - 図の通り</title>
+  <title>まちフォト</title>
   <style>
     /* 図のデザインを参考にしたCSS */
     :root {
@@ -13,6 +13,11 @@
       --オレンジ: #ff9800; /* 詳細モーダルの保存ボタン、削除ボタンの代替色 */
       --背景: #f8f8f8;
       --コンポーネント背景: white;
+      
+      /* アニメーション用追加 */
+      --hover-scale: 1.05;
+      --hover-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      --transition-speed: 0.2s;
     }
     body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: var(--背景); margin: 0; text-align: center; }
     header { background: var(--main-blue); color: white; padding: 20px 0; font-size: 1.6em; letter-spacing: 2px; }
@@ -24,9 +29,26 @@
     .unauthorized-box p { margin-bottom: 20px; color: #555; }
     
     /* Unauthorized Buttons */
-    .link-btn { background: none; border: none; color: var(--グレー); font-size: 0.9em; cursor: pointer; text-decoration: underline; padding: 10px; }
+    .link-btn { background: none; border: none; color: var(--グレー); font-size: 0.9em; cursor: pointer; text-decoration: underline; padding: 10px;
+      /* 【追加】ホバー時のアニメーション設定 */
+      transition: color var(--transition-speed), transform var(--transition-speed);
+    }
+    .link-btn:hover {
+      color: #333; /* ホバー時に少し濃く */
+      transform: scale(var(--hover-scale)); /* 少し大きく */
+    }
+
     .top-right-btn { position: absolute; top: 20px; right: 20px; z-index: 100; }
-    .action-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-size: 1em; }
+    .action-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-size: 1em;
+      /* 【追加】ホバー時のアニメーション設定 */
+      transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+    }
+    /* 【追加】共通のホバースタイル */
+    .action-btn:hover {
+      transform: scale(var(--hover-scale)); /* 少し大きく */
+      box-shadow: var(--hover-shadow); /* 影をつけて浮いた感じに */
+    }
+    
     .pink-btn { background: var(--ピンク); color: white; }
     .blue-btn { background: var(--main-blue); color: white; }
     .orange-btn { background: var(--オレンジ); color: white; }
@@ -39,7 +61,9 @@
     .action-box input[type="text"] { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
 
     /* Gallery */
-    #searchBox { margin: 20px; padding: 10px 20px; width: 60%; max-width: 400px; border: 2px solid var(--main-blue); border-radius: 25px; font-size: 1em; outline: none; }
+    #searchBox { margin: 20px; padding: 10px 20px; width: 60%; max-width: 400px; border: 2px solid var(--main-blue); border-radius: 25px; font-size: 1em; outline: none; transition: border-color var(--transition-speed); }
+    #searchBox:focus { border-color: var(--ピンク); } /* フォーカス時に色を変える */
+
     .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
     .tile-item { position: relative; width: 220px; background: var(--コンポーネント背景); border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.2s; overflow: hidden; cursor: pointer; text-align: center; }
     .tile-item:hover { transform: scale(1.03); }
@@ -51,7 +75,14 @@
     /* Action Buttons within Gallery Item (ホバー時に表示) */
     .tile-item-actions { position: absolute; top: 10px; right: 10px; display: none; flex-direction: column; gap: 5px; }
     .tile-item:hover .tile-item-actions { display: flex; }
-    .tile-item-actions button { padding: 5px 10px; border: none; border-radius: 5px; color: white; font-size: 0.7em; cursor: pointer; }
+    .tile-item-actions button { padding: 5px 10px; border: none; border-radius: 5px; color: white; font-size: 0.7em; cursor: pointer;
+      /* 【追加】ホバー時のアニメーション設定 */
+      transition: transform var(--transition-speed);
+    }
+    /* 【追加】ホバースタイル */
+    .tile-item-actions button:hover {
+      transform: scale(1.1); /* 少し大きめに */
+    }
     .edit-btn { background: #4caf50; }
     .delete-btn { background: #ff5252; }
     
@@ -74,6 +105,34 @@
     #detailModalContent img { max-width: 90%; max-height: 80%; border-radius: 8px; margin-bottom: 20px; }
     #detailModalContent .tag { background: var(--ピンク); color: white; display: inline-block; padding: 8px 15px; border-radius: 20px; font-size: 1em; }
     #detailModalContent .save-btn { background: var(--オレンジ); color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 1em; margin-top: 20px; }
+
+    /* 【追加】Loading Spinner CSS */
+    .spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5); /* 半透明の黒背景 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000; /* モーダルより上に */
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid var(--背景); /* 薄いグレー */
+      border-top: 5px solid var(--main-blue); /* メインカラーの青 */
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     
   </style>
 </head>
@@ -204,6 +263,11 @@
   </div>
 </div>
 
+<!-- 【追加】Loading Spinner HTML -->
+<div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+  <div class="spinner"></div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
@@ -230,6 +294,25 @@
   let images = [];
   let unauthorizedGallery = true; // 未ログイン時のギャラリーかどうか
   let currentAuthUser = null; // ログインユーザー
+
+  // 【追加】スピナー管理関数 (表示カウンター付き)
+  let spinnerCount = 0;
+  const spinnerRef = document.getElementById("loadingSpinner");
+
+  function showSpinner() {
+    if (spinnerCount === 0) {
+      spinnerRef.style.display = "flex";
+    }
+    spinnerCount++;
+  }
+
+  function hideSpinner() {
+    spinnerCount--;
+    if (spinnerCount <= 0) {
+      spinnerCount = 0; // 保険
+      spinnerRef.style.display = "none";
+    }
+  }
 
   // 画面管理関数
   function showMainContent() {
@@ -263,7 +346,8 @@
     agreedToTerms = true;
     hideModal(document.getElementById("termsModal"));
     // 利用規約に同意したらそのままログインポップアップを開く
-    signInWithPopup(auth, provider);
+    showSpinner(); // 【追加】ログイン処理開始
+    signInWithPopup(auth, provider).finally(() => hideSpinner()); // 【追加】終了
   };
 
   // ログイン・ログアウト
@@ -271,10 +355,14 @@
     if (!agreedToTerms) {
       showModal(document.getElementById("termsModal"));
     } else {
-      signInWithPopup(auth, provider);
+      showSpinner(); // 【追加】
+      signInWithPopup(auth, provider).finally(() => hideSpinner()); // 【追加】
     }
   };
-  document.getElementById("signOutBtnAuthorized").onclick = () => signOut(auth);
+  document.getElementById("signOutBtnAuthorized").onclick = () => {
+    showSpinner(); // 【追加】
+    signOut(auth).finally(() => hideSpinner()); // 【追加】
+  };
 
   // 状態監視
   onAuthStateChanged(auth, user => {
@@ -304,8 +392,9 @@
     });
   }
 
-  // 写真読み込み (維持)
+  // 写真読み込み (維持、スピナー追加)
   async function loadPhotos() {
+    showSpinner(); // 【追加】読み込み開始
     images = [];
     try {
       const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
@@ -316,6 +405,8 @@
       renderGallery();
     } catch (e) {
       document.querySelector(".gallery").innerHTML = "<p>写真の取得に失敗しました。</p>";
+    } finally {
+      hideSpinner(); // 【追加】終了
     }
   }
 
@@ -390,18 +481,20 @@
     e.stopPropagation();
     // ログインしていなければログインポップアップを開く
     if (!currentAuthUser) {
+        showSpinner(); // 【追加】
         signInWithPopup(auth, provider).then(() => {
             currentAuthUser = auth.currentUser;
             downloadImage();
         }).catch(() => {
             alert("ダウンロードするにはログインが必要です");
-        });
+        }).finally(() => hideSpinner()); // 【追加】
         return;
     }
     downloadImage();
   };
   
   async function downloadImage() {
+    showSpinner(); // 【追加】
     try {
         const file = document.getElementById("detailModalImg").src;
         const tag = document.getElementById("detailModalTag").textContent.replace("#", "");
@@ -417,51 +510,66 @@
         window.URL.revokeObjectURL(blobUrl);
     } catch (err) {
         alert("保存に失敗しました。");
+    } finally {
+      hideSpinner(); // 【追加】
     }
   }
 
   document.getElementById("closeDetailBtn").onclick = () => hideModal(document.getElementById("detailModal"));
 
-  // 編集確認モーダルの処理 (フロー調整)
+  // 編集確認モーダルの処理 (フロー調整、スピナー追加)
   document.getElementById("cancelEditBtn").onclick = () => hideModal(document.getElementById("editModal"));
   document.getElementById("saveEditBtn").onclick = async () => {
     const modal = document.getElementById("editModal");
     const newTag = document.getElementById("editTagInput").value;
     const docId = modal.dataset.docId;
     if (newTag && docId) {
-      await updateDoc(doc(db, "photos", docId), { tag: newTag });
-      hideModal(modal);
-      loadPhotos();
+      showSpinner(); // 【追加】
+      try {
+          await updateDoc(doc(db, "photos", docId), { tag: newTag });
+          hideModal(modal);
+          await loadPhotos(); // 内部でspinner管理あり
+      } catch(e) {
+          alert("編集失敗");
+      } finally {
+          hideSpinner(); // 【追加】終了
+      }
     } else {
         alert("タグを入力してください");
     }
   };
 
-  // 削除確認モーダルの処理 (フロー調整)
+  // 削除確認モーダルの処理 (フロー調整、スピナー追加)
   document.getElementById("cancelDeleteBtn").onclick = () => hideModal(document.getElementById("deleteModal"));
   document.getElementById("confirmDeleteBtn").onclick = async () => {
     const modal = document.getElementById("deleteModal");
     const docId = modal.dataset.docId;
     const file = modal.dataset.file;
     if (docId && file) {
+      showSpinner(); // 【追加】
       try {
         await deleteDoc(doc(db, "photos", docId));
         // Storageから削除するには、URLから参照を取得する必要があるため、単純なref(storage, url)が通らない場合はメタデータ等工夫が必要ですが、ここでは基本形を維持
         hideModal(modal);
-        loadPhotos();
-      } catch (error) { alert("削除失敗: " + error.message); }
+        await loadPhotos(); // 内部でspinner管理あり
+      } catch (error) { 
+        alert("削除失敗: " + error.message); 
+      } finally {
+        hideSpinner(); // 【追加】終了
+      }
     }
   };
 
   // 検索
   document.getElementById("searchBox").addEventListener("input", e => renderGallery(e.target.value));
 
-  // アップロード (維持)
+  // アップロード (維持、スピナー追加)
   document.getElementById("uploadBtnAuthorized").onclick = async () => {
     const file = document.getElementById("fileInput").files[0];
     const tag = document.getElementById("tagInput").value.trim();
     if (!file || !tag) return alert("ファイルとタグを入力してください");
 
+    showSpinner(); // 【追加】アップロード開始
     try {
       const compressedBlob = await compressImage(file, 0.7);
       const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
@@ -478,8 +586,12 @@
       alert("アップロード成功！");
       document.getElementById("fileInput").value = "";
       document.getElementById("tagInput").value = "";
-      loadPhotos();
-    } catch (error) { alert("失敗: " + error.message); }
+      await loadPhotos(); // 内部でspinner管理あり
+    } catch (error) { 
+      alert("失敗: " + error.message); 
+    } finally {
+      hideSpinner(); // 【追加】終了
+    }
   };
 </script>
 </body>
