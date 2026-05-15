@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>まちフォト</title>
   <style>
-    /* 図のデザインを参考にしたCSS */
+    /* 全体デザイン・カラー設定 */
     :root {
       --main-blue: #2196f3;
       --グレー: #757575; 
@@ -49,13 +49,27 @@
     #searchBox:focus { border-color: var(--ピンク); }
     #sortSelect { padding: 10px 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 1em; outline: none; background: white; cursor: pointer; }
 
+    /* ギャラリーとタイル（★GPU処理・アニメーション最適化済み） */
     .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
-    .tile-item { position: relative; width: 220px; background: var(--コンポーネント背景); border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.2s; overflow: hidden; cursor: pointer; text-align: left; }
-    .tile-item:hover { transform: scale(1.03); }
+    .tile-item { 
+      position: relative; 
+      width: 220px; 
+      background: var(--コンポーネント背景); 
+      border-radius: 12px; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
+      transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s ease; 
+      will-change: transform; /* ブラウザに事前予告して軽くする */
+      overflow: hidden; 
+      cursor: pointer; 
+      text-align: left; 
+    }
+    .tile-item:hover { 
+      transform: scale(1.03) translateZ(0); /* translateZ(0)でGPU処理を強制 */
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+    }
     
     .tile-item img { width: 100%; height: 150px; object-fit: cover; }
     
-    /* infoエリアのレイアウト変更 (タグといいねを横並びに) */
     .tile-item .info { padding: 10px; display: flex; justify-content: space-between; align-items: center; }
     .tile-item .tag { background: var(--ピンク); color: white; display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
 
@@ -73,6 +87,7 @@
     .edit-btn { background: #4caf50; }
     .delete-btn { background: #ff5252; }
     
+    /* モーダル */
     .simplified-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
     .simplified-modal-content { background: var(--コンポーネント背景); padding: 30px; border-radius: 15px; text-align: left; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     .simplified-modal h2 { margin-top: 0; color: #333; font-size: 1.4em; border-bottom: 2px solid var(--main-blue); padding-bottom: 10px; margin-bottom: 20px; }
@@ -89,6 +104,7 @@
     #detailModalContent .tag { background: var(--ピンク); color: white; display: inline-block; padding: 8px 15px; border-radius: 20px; font-size: 1em; }
     #detailModalContent .save-btn { background: var(--オレンジ); color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 1em; margin-top: 20px; }
 
+    /* スピナー */
     .spinner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 9999; }
     .spinner { width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.3); border-top: 5px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
     .spinner-text { color: white; font-weight: bold; letter-spacing: 2px; font-size: 1.1em; }
@@ -133,7 +149,7 @@
   <div class="gallery"></div>
 </div>
 
-<!-- モーダル群 (省略せずに維持) -->
+<!-- モーダル群 -->
 <div id="termsModal" class="simplified-modal">
   <div id="termsModalContent" class="simplified-modal-content">
    <div id="termsBox">
@@ -199,7 +215,6 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-  // ★ arrayUnion, arrayRemove を追加インポート
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -306,26 +321,22 @@
     }
   }
 
-  // ★ ギャラリー描画 (並び替え・いいね機能対応)
+  // ★ ギャラリー描画 (一括描画・遅延読み込み対応済み)
   function renderGallery() {
     const filter = document.getElementById("searchBox").value;
     const sortMode = document.getElementById("sortSelect").value;
     const gallery = document.querySelector(".gallery");
     gallery.innerHTML = "";
     
-    // 1. フィルタリング
     let filtered = images.filter(img => img.tag.includes(filter));
 
-    // 2. 並び替え (ソート)
     if (sortMode === "popular") {
-      // いいねが多い順 (likes配列がない場合は0として扱う)
       filtered.sort((a, b) => {
         const likesA = a.likes ? a.likes.length : 0;
         const likesB = b.likes ? b.likes.length : 0;
         return likesB - likesA;
       });
     } else {
-      // 新着順 (createdAtがFirestore Timestampであることを考慮)
       filtered.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
     }
 
@@ -334,19 +345,21 @@
       return;
     }
 
+    // ★ DOMの計算を一回にするための「仮の箱」
+    const fragment = document.createDocumentFragment();
+
     filtered.forEach(img => {
       const item = document.createElement("div");
       item.className = "tile-item";
       
       const isOwner = currentAuthUser && currentAuthUser.uid === img.userId;
-      
-      // いいね状態の判定
       const likesCount = img.likes ? img.likes.length : 0;
       const hasLiked = currentAuthUser && img.likes && img.likes.includes(currentAuthUser.uid);
       const heartClass = hasLiked ? "active" : "inactive";
 
+      // ★ <img>タグに loading="lazy" を追加して描画負荷を下げる
       item.innerHTML = `
-        <img src="${img.file}" alt="${img.tag}" class="thumb">
+        <img src="${img.file}" alt="${img.tag}" class="thumb" loading="lazy">
         <div class="info">
           <span class="tag">#${img.tag}</span>
           <div class="like-area">
@@ -362,7 +375,6 @@
         ` : ""}
       `;
 
-      // モーダル表示
       item.querySelector(".thumb").onclick = () => {
         const modal = document.getElementById("detailModal");
         document.getElementById("detailModalImg").src = img.file;
@@ -370,7 +382,6 @@
         showModal(modal);
       };
 
-      // ★ いいねボタンのクリック処理
       item.querySelector(".like-icon").onclick = async (e) => {
         e.stopPropagation();
         if (!currentAuthUser) {
@@ -381,17 +392,13 @@
         const docId = e.target.dataset.id;
         const photoRef = doc(db, "photos", docId);
         
-        // 連続クリック防止のために軽くスピナーを表示（任意）
         document.getElementById("loadingSpinner").style.display = "flex";
         try {
           if (hasLiked) {
-            // 既にいいねしている場合は取り消し
             await updateDoc(photoRef, { likes: arrayRemove(currentAuthUser.uid) });
           } else {
-            // いいねを追加
             await updateDoc(photoRef, { likes: arrayUnion(currentAuthUser.uid) });
           }
-          // データを再読み込みして描画更新
           await loadPhotos();
         } catch (error) {
           alert("いいねの更新に失敗しました。");
@@ -418,15 +425,18 @@
           modal.dataset.file = img.file;
         };
       }
-      gallery.appendChild(item);
+      
+      // ★ 仮の箱に一つずつ入れる
+      fragment.appendChild(item);
     });
+    
+    // ★ ループが終わったら、最後に一気に画面へ配置する（1回だけの処理で済むので軽い）
+    gallery.appendChild(fragment);
   }
 
-  // ★ 検索と並び替えのイベントリスナー
   document.getElementById("searchBox").addEventListener("input", renderGallery);
   document.getElementById("sortSelect").addEventListener("change", renderGallery);
 
-  // 以下、既存の処理 (変更なし)
   document.getElementById("cancelEditBtn").onclick = () => hideModal(document.getElementById("editModal"));
   document.getElementById("saveEditBtn").onclick = async () => {
     const modal = document.getElementById("editModal");
@@ -513,7 +523,6 @@
       const snapshot = await uploadBytes(storageRef, compressedBlob);
       const url = await getDownloadURL(snapshot.ref);
 
-      // ★ 新規投稿時に likes: [] を追加
       await addDoc(collection(db, "photos"), {
         file: url,
         tag: tag,
