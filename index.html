@@ -43,13 +43,13 @@
     .action-box input[type="file"] { margin-bottom: 10px; width: calc(100% - 20px); }
     .action-box input[type="text"] { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
 
-    /* 検索と並び替えのコントロールエリア */
+    /* 検索と並び替え */
     .controls-area { margin: 20px auto; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 600px; }
     #searchBox { padding: 10px 20px; width: 60%; min-width: 200px; border: 2px solid var(--main-blue); border-radius: 25px; font-size: 1em; outline: none; transition: border-color var(--transition-speed); }
     #searchBox:focus { border-color: var(--ピンク); }
     #sortSelect { padding: 10px 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 1em; outline: none; background: white; cursor: pointer; }
 
-    /* ギャラリーとタイル（★GPU処理・アニメーション最適化済み） */
+    /* ギャラリーとタイル */
     .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
     .tile-item { 
       position: relative; 
@@ -58,29 +58,34 @@
       border-radius: 12px; 
       box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
       transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s ease; 
-      will-change: transform; /* ブラウザに事前予告して軽くする */
+      will-change: transform; 
       overflow: hidden; 
       cursor: pointer; 
       text-align: left; 
     }
     .tile-item:hover { 
-      transform: scale(1.03) translateZ(0); /* translateZ(0)でGPU処理を強制 */
+      transform: scale(1.03) translateZ(0); 
       box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
     }
     
-    .tile-item img { width: 100%; height: 150px; object-fit: cover; }
+    .user-profile { padding: 10px 10px 5px; display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; }
+    .user-icon { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #eee; }
+    .user-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
+
+    .tile-item img.thumb { width: 100%; height: 150px; object-fit: cover; }
     
-    .tile-item .info { padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .tile-item .info { padding: 5px 10px 10px; display: flex; justify-content: space-between; align-items: center; }
     .tile-item .tag { background: var(--ピンク); color: white; display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
 
-    /* いいねボタンのデザイン */
+    /* いいねボタン */
     .like-area { display: flex; align-items: center; gap: 4px; font-size: 0.9em; font-weight: bold; }
     .like-icon { cursor: pointer; font-size: 1.2em; transition: transform 0.2s; }
     .like-icon:hover { transform: scale(1.2); }
     .like-icon.active { color: var(--ピンク); }
     .like-icon.inactive { color: #ccc; }
 
-    .tile-item-actions { position: absolute; top: 10px; right: 10px; display: none; flex-direction: column; gap: 5px; }
+    /* ホバー時のアクションボタン */
+    .tile-item-actions { position: absolute; top: 40px; right: 10px; display: none; flex-direction: column; gap: 5px; z-index: 10; }
     .tile-item:hover .tile-item-actions { display: flex; }
     .tile-item-actions button { padding: 5px 10px; border: none; border-radius: 5px; color: white; font-size: 0.7em; cursor: pointer; transition: transform var(--transition-speed); }
     .tile-item-actions button:hover { transform: scale(1.1); }
@@ -137,7 +142,6 @@
     </div>
   </div>
   
-  <!-- 検索と並び替え -->
   <div class="controls-area">
     <input type="text" id="searchBox" placeholder="タグで検索...">
     <select id="sortSelect">
@@ -152,14 +156,86 @@
 <!-- モーダル群 -->
 <div id="termsModal" class="simplified-modal">
   <div id="termsModalContent" class="simplified-modal-content">
-   <div id="termsBox">
+    <div id="termsBox">
     <h2>利用規約およびプライバシーポリシー</h2>
-    <div style="height:350px; overflow-y:auto; border:1px solid #eee; padding:15px; font-size: 0.85em; line-height: 1.7; background: #fafafa; color: #333;">
-      <p>利用規約の内容（省略）</p>
+    
+    <!-- ★修正： height:350px を max-height:50vh に変更し、スマホでもはみ出さないようにしました -->
+    <div style="max-height:50vh; overflow-y:auto; border:1px solid #eee; padding:15px; font-size: 0.85em; line-height: 1.7; background: #fafafa; color: #333; text-align: left;">
+      
+      <h3 style="border-left: 4px solid #2196f3; padding-left: 8px; margin-top: 0;">【第1部：利用規約】</h3>
+      <p>この利用規約（以下「本規約」）は、「まちフォト」（以下「本サービス」）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。</p>
+
+      <p><strong>第1条（適用・同意）</strong><br>
+      1. 本規約は、ユーザーと本サービスの運営者（以下「運営者」）との間の、本サービスの利用に関わる一切の関係に適用されます。<br>
+      2. ユーザーは、本サービスを利用（ログイン、画像の閲覧・投稿等）した時点で、本規約に同意したものとみなされます。</p>
+
+      <p><strong>第2条（ユーザー登録とアカウント管理）</strong><br>
+      1. 本サービスの一部機能（投稿、いいね等）を利用するには、Googleアカウントによるログインが必要です。<br>
+      2. ユーザーは、自身のアカウントの不正利用を防止する責任を負い、運営者はアカウントの不正利用によって生じた損害について一切の責任を負いません。</p>
+
+      <p><strong>第3条（禁止事項）</strong><br>
+      ユーザーは、本サービスの利用にあたり、以下の行為をしてはなりません。<br>
+      ・法令または公序良俗に違反する行為<br>
+      ・犯罪行為に関連する行為<br>
+      ・運営者、他のユーザー、または第三者のサーバーやネットワークの機能を破壊したり、妨害したりする行為<br>
+      ・<strong>他者の著作権、商標権、プライバシー権、肖像権を侵害する画像の投稿（許可を得ていない人物の写真、インターネット上の画像の無断転載など）</strong><br>
+      ・個人を特定できる情報（住所、電話番号、車のナンバープレートなど）が明確に写り込んだ画像の投稿<br>
+      ・わいせつ、暴力的な内容、または他者に不快感を与える画像の投稿<br>
+      ・本サービスの運営を妨害するおそれのある行為<br>
+      ・他のユーザーに関する個人情報等を収集または蓄積する行為</p>
+
+      <p><strong>第4条（投稿データの権利と運営者の削除権限）</strong><br>
+      1. ユーザーが投稿した画像データの著作権は、ユーザー自身または正当な権利者に留保されます。<br>
+      2. ユーザーは、運営者に対し、本サービスの提供、システムの構築・改良、およびプロモーションに必要な範囲で、投稿データを無償で非独占的に利用（複製、表示、改変等）することを許諾するものとします。<br>
+      3. 運営者は、第3条の禁止事項に該当すると判断した画像、または本サービスの運営上不適切と判断した画像を、ユーザーに事前の通知なく削除することができるものとします。</p>
+
+      <p><strong>第5条（免責事項）</strong><br>
+      1. 運営者は、本サービスに事実上または法律上の瑕疵（安全性、信頼性、正確性、完全性、有効性、特定の目的への適合性、セキュリティなどに関する欠陥、エラーやバグ、権利侵害などを含みます）がないことを明示的にも黙示的にも保証しておりません。<br>
+      2. 運営者は、本サービスに起因してユーザーに生じたあらゆる損害について一切の責任を負いません。ユーザー間のトラブル（肖像権・著作権侵害のクレーム等）は、当事者間で解決するものとします。<br>
+      3. 本サービスは、予告なくサービスの変更、停止、または終了することがあります。</p>
+
+      <hr style="margin: 20px 0; border-top: 1px dashed #ccc;">
+
+      <h3 style="border-left: 4px solid #4caf50; padding-left: 8px;">【第2部：プライバシーポリシー】</h3>
+      <p>運営者は、本サービスにおけるユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下「本ポリシー」）を定めます。</p>
+
+      <p><strong>1. 収集する個人情報</strong><br>
+      本サービスは、ユーザーがGoogleアカウントでログインする際、以下の情報を取得します。<br>
+      ・Googleアカウントに登録されているユーザー名（表示名）<br>
+      ・プロフィール画像のURL<br>
+      ・ユーザーの一意の識別子（UID）<br>
+      ※ パスワードなどの認証情報はGoogle側で管理され、本サービスが取得・保持することはありません。</p>
+
+      <p><strong>2. 収集する利用データ</strong><br>
+      ・投稿された画像データ、タグ、投稿日時<br>
+      ・「いいね」の履歴<br>
+      ・サービス提供基盤（Firebase）によって自動的に収集されるIPアドレスや端末の利用環境等のログデータ</p>
+
+      <p><strong>3. 利用目的</strong><br>
+      取得した情報は、以下の目的でのみ利用します。<br>
+      ・本サービスの提供・運営（ギャラリーへの画像、ユーザー名、アイコンの表示等）<br>
+      ・ユーザーからのお問い合わせ対応<br>
+      ・利用規約に違反したユーザーの特定および対応<br>
+      ・本サービスの改善、新機能の開発のための分析</p>
+
+      <p><strong>4. データの管理と第三者提供</strong><br>
+      ・本サービスは、データの保存にGoogle LLCが提供する「Firebase」を利用しています。データは強固なセキュリティ環境下で保管されます。<br>
+      ・運営者は、次に掲げる場合を除いて、あらかじめユーザーの同意を得ることなく第三者に個人情報を提供することはありません。<br>
+      　1. 法令に基づく場合<br>
+      　2. 人の生命、身体または財産の保護のために必要がある場合</p>
+
+      <p><strong>5. データの削除（退会）</strong><br>
+      ユーザーは、本サービス上で自身が投稿した画像データを任意に削除することができます。アカウント自体のご利用停止やデータの完全削除をご希望の場合は、以下の窓口までご連絡ください。</p>
+
+      <p><strong>6. お問い合わせ窓口</strong><br>
+      本ポリシーに関するお問い合わせは、以下のメールアドレス、またはSNSアカウントまでお願いいたします。<br>
+      メールアドレス：[★あなたのメールアドレスを記載★]<br>
+      X (旧Twitter)：[★あなたのアカウントURLを記載（任意）★]</p>
+      
     </div>
     <div style="margin-top:20px; text-align:center;">
-      <button id="agreeBtn" style="padding:12px 30px; background:#2196f3; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">同意して利用を開始する</button>
-      <button id="closeTermsBtn" style="padding:12px 20px; margin-left:10px; border:none; border-radius:5px; cursor:pointer; background:#ccc;">同意しない</button>
+      <button id="agreeBtn" style="padding:12px 30px; background:#2196f3; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; transition: 0.2s;">同意して利用を開始する</button>
+      <button id="closeTermsBtn" style="padding:12px 20px; margin-left:10px; border:none; border-radius:5px; cursor:pointer; background:#ccc; transition: 0.2s;">同意しない</button>
     </div>
    </div>
   </div>
@@ -237,6 +313,9 @@
   let images = [];
   let currentAuthUser = null;
 
+  let displayCount = 12; 
+  const LOAD_STEP = 12;  
+
   function showSpinner() { document.getElementById("loadingSpinner").style.display = "flex"; }
   function hideSpinner() { document.getElementById("loadingSpinner").style.display = "none"; }
 
@@ -258,11 +337,16 @@
 
   document.getElementById("showTermsBtnUnauthorized").onclick = () => showModal(document.getElementById("termsModal"));
   document.getElementById("closeTermsBtn").onclick = () => hideModal(document.getElementById("termsModal"));
+  
+  // ★修正：ログイン処理にエラーメッセージ（.catch）を追加しました
   document.getElementById("agreeBtn").onclick = () => {
     agreedToTerms = true;
     hideModal(document.getElementById("termsModal"));
     showSpinner();
-    signInWithPopup(auth, provider).finally(() => hideSpinner());
+    signInWithPopup(auth, provider).catch(error => {
+      console.error(error);
+      alert("ログインに失敗しました。\n・LINEなどのアプリ内ブラウザを使っている場合はSafariやChromeで開き直してください。\n・エラー詳細: " + error.message);
+    }).finally(() => hideSpinner());
   };
 
   document.getElementById("signInBtnUnauthorized").onclick = () => {
@@ -270,9 +354,13 @@
       showModal(document.getElementById("termsModal"));
     } else {
       showSpinner();
-      signInWithPopup(auth, provider).finally(() => hideSpinner());
+      signInWithPopup(auth, provider).catch(error => {
+        console.error(error);
+        alert("ログインに失敗しました。\n・LINEなどのアプリ内ブラウザを使っている場合はSafariやChromeで開き直してください。\n・エラー詳細: " + error.message);
+      }).finally(() => hideSpinner());
     }
   };
+
   document.getElementById("signOutBtnAuthorized").onclick = () => {
     showSpinner();
     signOut(auth).finally(() => hideSpinner());
@@ -304,7 +392,7 @@
     });
   }
 
-  async function loadPhotos() {
+  async function loadPhotos(keepCount = false) {
     showSpinner();
     images = [];
     try {
@@ -313,7 +401,7 @@
       querySnapshot.forEach(docSnap => {
         images.push({ ...docSnap.data(), docId: docSnap.id });
       });
-      renderGallery();
+      renderGallery(!keepCount); 
     } catch (e) {
       document.querySelector(".gallery").innerHTML = "<p>写真の取得に失敗しました。</p>";
     } finally {
@@ -321,8 +409,11 @@
     }
   }
 
-  // ★ ギャラリー描画 (一括描画・遅延読み込み対応済み)
-  function renderGallery() {
+  function renderGallery(resetCount = true) {
+    if (resetCount) {
+      displayCount = LOAD_STEP; 
+    }
+
     const filter = document.getElementById("searchBox").value;
     const sortMode = document.getElementById("sortSelect").value;
     const gallery = document.querySelector(".gallery");
@@ -345,10 +436,10 @@
       return;
     }
 
-    // ★ DOMの計算を一回にするための「仮の箱」
+    const itemsToShow = filtered.slice(0, displayCount);
     const fragment = document.createDocumentFragment();
 
-    filtered.forEach(img => {
+    itemsToShow.forEach(img => {
       const item = document.createElement("div");
       item.className = "tile-item";
       
@@ -357,9 +448,17 @@
       const hasLiked = currentAuthUser && img.likes && img.likes.includes(currentAuthUser.uid);
       const heartClass = hasLiked ? "active" : "inactive";
 
-      // ★ <img>タグに loading="lazy" を追加して描画負荷を下げる
+      const userName = img.userName || "名無しユーザー";
+      const userIcon = img.userIcon || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+
       item.innerHTML = `
+        <div class="user-profile">
+          <img src="${userIcon}" alt="icon" class="user-icon" loading="lazy">
+          <span class="user-name">${userName}</span>
+        </div>
+        
         <img src="${img.file}" alt="${img.tag}" class="thumb" loading="lazy">
+        
         <div class="info">
           <span class="tag">#${img.tag}</span>
           <div class="like-area">
@@ -399,9 +498,8 @@
           } else {
             await updateDoc(photoRef, { likes: arrayUnion(currentAuthUser.uid) });
           }
-          await loadPhotos();
+          await loadPhotos(true);
         } catch (error) {
-          alert("いいねの更新に失敗しました。");
           console.error(error);
         } finally {
           document.getElementById("loadingSpinner").style.display = "none";
@@ -426,16 +524,26 @@
         };
       }
       
-      // ★ 仮の箱に一つずつ入れる
       fragment.appendChild(item);
     });
     
-    // ★ ループが終わったら、最後に一気に画面へ配置する（1回だけの処理で済むので軽い）
     gallery.appendChild(fragment);
   }
 
-  document.getElementById("searchBox").addEventListener("input", renderGallery);
-  document.getElementById("sortSelect").addEventListener("change", renderGallery);
+  document.getElementById("searchBox").addEventListener("input", () => renderGallery(true));
+  document.getElementById("sortSelect").addEventListener("change", () => renderGallery(true));
+
+  window.addEventListener("scroll", () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+      const filter = document.getElementById("searchBox").value;
+      const filtered = images.filter(img => img.tag.includes(filter));
+      
+      if (displayCount < filtered.length) {
+        displayCount += LOAD_STEP; 
+        renderGallery(false); 
+      }
+    }
+  });
 
   document.getElementById("cancelEditBtn").onclick = () => hideModal(document.getElementById("editModal"));
   document.getElementById("saveEditBtn").onclick = async () => {
@@ -449,7 +557,7 @@
       await updateDoc(doc(db, "photos", docId), { tag: newTag });
       hideModal(modal);
       alert("タグを変更しました！");
-      await loadPhotos();
+      await loadPhotos(true); 
     } catch(e) {
       alert("編集に失敗しました。");
     } finally { hideSpinner(); }
@@ -472,7 +580,7 @@
       await deleteDoc(doc(db, "photos", docId));
       hideModal(modal);
       alert("画像を削除しました。");
-      await loadPhotos();
+      await loadPhotos(true); 
     } catch (error) { alert("削除に失敗しました: " + error.message); } 
     finally { hideSpinner(); }
   };
@@ -519,7 +627,8 @@
     showSpinner();
     try {
       const compressedBlob = await compressImage(file, 0.7);
-      const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
+      const fileName = `${auth.currentUser.uid}_${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, `uploads/${fileName}`);
       const snapshot = await uploadBytes(storageRef, compressedBlob);
       const url = await getDownloadURL(snapshot.ref);
 
@@ -527,6 +636,8 @@
         file: url,
         tag: tag,
         userId: auth.currentUser.uid,
+        userName: auth.currentUser.displayName || "ユーザー",
+        userIcon: auth.currentUser.photoURL || "",
         createdAt: new Date(),
         likes: [] 
       });
@@ -534,7 +645,7 @@
       alert("アップロード成功！");
       document.getElementById("fileInput").value = "";
       document.getElementById("tagInput").value = "";
-      await loadPhotos();
+      await loadPhotos(); 
     } catch (error) { alert("アップロード失敗: " + error.message); } 
     finally { hideSpinner(); }
   };
