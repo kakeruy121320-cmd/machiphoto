@@ -29,7 +29,8 @@
     .link-btn { background: none; border: none; color: var(--グレー); font-size: 0.9em; cursor: pointer; text-decoration: underline; padding: 10px; transition: color var(--transition-speed), transform var(--transition-speed); }
     .link-btn:hover { color: #333; transform: scale(var(--hover-scale)); }
 
-    .top-right-btn { position: absolute; top: 20px; right: 20px; z-index: 100; }
+    /* ★ 右上のボタン配置調整 */
+    .header-buttons { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 100; }
     .action-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-size: 1em; transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed); }
     .action-btn:hover { transform: scale(var(--hover-scale)); box-shadow: var(--hover-shadow); }
     
@@ -43,30 +44,14 @@
     .action-box input[type="file"] { margin-bottom: 10px; width: calc(100% - 20px); }
     .action-box input[type="text"] { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
 
-    /* 検索と並び替え */
     .controls-area { margin: 20px auto; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 600px; }
     #searchBox { padding: 10px 20px; width: 60%; min-width: 200px; border: 2px solid var(--main-blue); border-radius: 25px; font-size: 1em; outline: none; transition: border-color var(--transition-speed); }
     #searchBox:focus { border-color: var(--ピンク); }
     #sortSelect { padding: 10px 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 1em; outline: none; background: white; cursor: pointer; }
 
-    /* ギャラリーとタイル */
     .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
-    .tile-item { 
-      position: relative; 
-      width: 220px; 
-      background: var(--コンポーネント背景); 
-      border-radius: 12px; 
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
-      transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s ease; 
-      will-change: transform; 
-      overflow: hidden; 
-      cursor: pointer; 
-      text-align: left; 
-    }
-    .tile-item:hover { 
-      transform: scale(1.03) translateZ(0); 
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
-    }
+    .tile-item { position: relative; width: 220px; background: var(--コンポーネント背景); border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s ease; will-change: transform; overflow: hidden; cursor: pointer; text-align: left; }
+    .tile-item:hover { transform: scale(1.03) translateZ(0); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
     
     .user-profile { padding: 10px 10px 5px; display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; }
     .user-icon { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #eee; }
@@ -77,14 +62,12 @@
     .tile-item .info { padding: 5px 10px 10px; display: flex; justify-content: space-between; align-items: center; }
     .tile-item .tag { background: var(--ピンク); color: white; display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
 
-    /* いいねボタン */
     .like-area { display: flex; align-items: center; gap: 4px; font-size: 0.9em; font-weight: bold; }
     .like-icon { cursor: pointer; font-size: 1.2em; transition: transform 0.2s; }
     .like-icon:hover { transform: scale(1.2); }
     .like-icon.active { color: var(--ピンク); }
     .like-icon.inactive { color: #ccc; }
 
-    /* ホバー時のアクションボタン */
     .tile-item-actions { position: absolute; top: 40px; right: 10px; display: none; flex-direction: column; gap: 5px; z-index: 10; }
     .tile-item:hover .tile-item-actions { display: flex; }
     .tile-item-actions button { padding: 5px 10px; border: none; border-radius: 5px; color: white; font-size: 0.7em; cursor: pointer; transition: transform var(--transition-speed); }
@@ -92,7 +75,6 @@
     .edit-btn { background: #4caf50; }
     .delete-btn { background: #ff5252; }
     
-    /* モーダル */
     .simplified-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
     .simplified-modal-content { background: var(--コンポーネント背景); padding: 30px; border-radius: 15px; text-align: left; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     .simplified-modal h2 { margin-top: 0; color: #333; font-size: 1.4em; border-bottom: 2px solid var(--main-blue); padding-bottom: 10px; margin-bottom: 20px; }
@@ -109,7 +91,6 @@
     #detailModalContent .tag { background: var(--ピンク); color: white; display: inline-block; padding: 8px 15px; border-radius: 20px; font-size: 1em; }
     #detailModalContent .save-btn { background: var(--オレンジ); color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 1em; margin-top: 20px; }
 
-    /* スピナー */
     .spinner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 9999; }
     .spinner { width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.3); border-top: 5px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
     .spinner-text { color: white; font-weight: bold; letter-spacing: 2px; font-size: 1.1em; }
@@ -133,7 +114,12 @@
   </div>
   
   <div id="authorizedMain" style="display:none;">
-    <button id="signOutBtnAuthorized" class="link-btn top-right-btn gray-btn">ログアウト</button>
+    <!-- ★ 右上のボタンをまとめる -->
+    <div class="header-buttons">
+      <button id="profileSettingsBtn" class="action-btn gray-btn" style="font-size: 0.85em; padding: 8px 15px;">プロフィール設定</button>
+      <button id="signOutBtnAuthorized" class="link-btn" style="color: #fff; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 8px 15px;">ログアウト</button>
+    </div>
+    
     <div id="uploadArea" class="action-box">
       <h3>新しい写真をアップロード</h3>
       <input type="file" id="fileInput" accept="image/*">
@@ -153,6 +139,28 @@
   <div class="gallery"></div>
 </div>
 
+<!-- ★ 追加：プロフィール設定モーダル -->
+<div id="profileModal" class="simplified-modal">
+  <div id="profileModalContent" class="simplified-modal-content">
+    <h2>プロフィール設定</h2>
+    <div class="content">
+      <p style="font-size: 0.9em;">他のユーザーに公開されるニックネームとアイコンを設定します。<br>※Googleアカウントの本名やアイコンは公開されません。</p>
+      <label style="display:block; margin-bottom:5px; font-weight:bold;">ニックネーム</label>
+      <input type="text" id="profileNicknameInput" placeholder="例：カメラマン太郎" style="width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
+      
+      <label style="display:block; margin-bottom:5px; font-weight:bold;">アイコン画像 (任意)</label>
+      <input type="file" id="profileIconInput" accept="image/*" style="margin-bottom: 10px;">
+      <div style="margin-top:10px;">
+        <img id="currentProfileIconPreview" src="" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:none; border: 2px solid #ddd;">
+      </div>
+    </div>
+    <div class="action-area">
+      <button id="cancelProfileBtn" class="action-btn gray-btn">キャンセル</button>
+      <button id="saveProfileBtn" class="action-btn pink-btn">保存する</button>
+    </div>
+  </div>
+</div>
+
 <!-- モーダル群 -->
 <div id="termsModal" class="simplified-modal">
   <div id="termsModalContent" class="simplified-modal-content">
@@ -160,77 +168,18 @@
     <h2>利用規約およびプライバシーポリシー</h2>
     
     <div style="max-height:50vh; overflow-y:auto; border:1px solid #eee; padding:15px; font-size: 0.85em; line-height: 1.7; background: #fafafa; color: #333; text-align: left;">
-      
       <h3 style="border-left: 4px solid #2196f3; padding-left: 8px; margin-top: 0;">【第1部：利用規約】</h3>
       <p>この利用規約（以下「本規約」）は、「まちフォト」（以下「本サービス」）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。</p>
-
-      <p><strong>第1条（適用・同意）</strong><br>
-      1. 本規約は、ユーザーと本サービスの運営者（以下「運営者」）との間の、本サービスの利用に関わる一切の関係に適用されます。<br>
-      2. ユーザーは、本サービスを利用（ログイン、画像の閲覧・投稿等）した時点で、本規約に同意したものとみなされます。</p>
-
-      <p><strong>第2条（ユーザー登録とアカウント管理）</strong><br>
-      1. 本サービスの一部機能（投稿、いいね等）を利用するには、Googleアカウントによるログインが必要です。<br>
-      2. ユーザーは、自身のアカウントの不正利用を防止する責任を負い、運営者はアカウントの不正利用によって生じた損害について一切の責任を負いません。</p>
-
-      <p><strong>第3条（禁止事項）</strong><br>
-      ユーザーは、本サービスの利用にあたり、以下の行為をしてはなりません。<br>
-      ・法令または公序良俗に違反する行為<br>
-      ・犯罪行為に関連する行為<br>
-      ・運営者、他のユーザー、または第三者のサーバーやネットワークの機能を破壊したり、妨害したりする行為<br>
-      ・<strong>他者の著作権、商標権、プライバシー権、肖像権を侵害する画像の投稿（許可を得ていない人物の写真、インターネット上の画像の無断転載など）</strong><br>
-      ・個人を特定できる情報（住所、電話番号、車のナンバープレートなど）が明確に写り込んだ画像の投稿<br>
-      ・わいせつ、暴力的な内容、または他者に不快感を与える画像の投稿</p>
-
-      <!-- ★ 修正：商用利用についての条項を追加・強調しました -->
-      <p><strong>第4条（投稿データの権利と「商用利用」の許諾）</strong><br>
-      1. ユーザーが投稿した画像データの著作権は、ユーザー自身または正当な権利者に留保されます。<br>
-      2. <strong>【重要】ユーザーは、本サービスに画像を投稿した時点で、他の全てのユーザーおよび運営者に対し、その画像の「無償かつ無期限の商用利用（複製、表示、改変、再配布を含む）」を許諾したものとみなされます。</strong><br>
-      3. 本サービスは「商用利用可能なフリー素材」を提供することを目的としています。そのため、他人の著作物や、商用利用が許可されていない被写体が含まれる画像は絶対に投稿しないでください。<br>
-      4. 運営者は、第3条の禁止事項に該当すると判断した画像、または本サービスの運営上不適切と判断した画像を、ユーザーに事前の通知なく削除することができるものとします。</p>
-
-      <p><strong>第5条（免責事項）</strong><br>
-      1. 運営者は、本サービスに事実上または法律上の瑕疵がないことを明示的にも黙示的にも保証しておりません。<br>
-      2. 運営者は、本サービスに起因してユーザーに生じたあらゆる損害について一切の責任を負いません。ユーザー間（および画像を利用した第三者間）のトラブルは、当事者間で解決するものとします。<br>
-      3. 本サービスは、予告なくサービスの変更、停止、または終了することがあります。</p>
-
+      <p><strong>第1条（適用・同意）</strong><br>1. 本規約は、ユーザーと本サービスの運営者との間の、本サービスの利用に関わる一切の関係に適用されます。<br>2. ユーザーは、本サービスを利用した時点で、本規約に同意したものとみなされます。</p>
+      <p><strong>第2条（ユーザー登録とアカウント管理）</strong><br>1. 本サービスの一部機能を利用するにはログインが必要です。<br>2. ユーザーは自身のアカウントの不正利用を防止する責任を負います。</p>
+      <p><strong>第3条（禁止事項）</strong><br>ユーザーは、本サービスの利用にあたり、以下の行為をしてはなりません。<br>・法令または公序良俗に違反する行為<br>・<strong>他者の著作権、プライバシー権、肖像権を侵害する画像の投稿</strong><br>・個人を特定できる情報が明確に写り込んだ画像の投稿<br>・わいせつ、暴力的な内容の投稿</p>
+      <p><strong>第4条（投稿データの権利と「商用利用」の許諾）</strong><br>1. ユーザーが投稿した画像データの著作権は、ユーザー自身または正当な権利者に留保されます。<br>2. <strong>【重要】ユーザーは、本サービスに画像を投稿した時点で、他の全てのユーザーおよび運営者に対し、その画像の「無償かつ無期限の商用利用」を許諾したものとみなされます。</strong><br>3. 他人の著作物や、商用利用が許可されていない被写体が含まれる画像は絶対に投稿しないでください。</p>
+      <p><strong>第5条（免責事項）</strong><br>本サービスに起因して生じたあらゆる損害について運営者は一切の責任を負いません。</p>
       <hr style="margin: 20px 0; border-top: 1px dashed #ccc;">
-
       <h3 style="border-left: 4px solid #4caf50; padding-left: 8px;">【第2部：プライバシーポリシー】</h3>
-      <p>運営者は、本サービスにおけるユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下「本ポリシー」）を定めます。</p>
-
-      <p><strong>1. 収集する個人情報</strong><br>
-      本サービスは、ユーザーがGoogleアカウントでログインする際、以下の情報を取得します。<br>
-      ・Googleアカウントに登録されているユーザー名（表示名）<br>
-      ・プロフィール画像のURL<br>
-      ・ユーザーの一意の識別子（UID）<br>
-      ※ パスワードなどの認証情報はGoogle側で管理され、本サービスが取得・保持することはありません。</p>
-
-      <p><strong>2. 収集する利用データ</strong><br>
-      ・投稿された画像データ、タグ、投稿日時<br>
-      ・「いいね」の履歴<br>
-      ・サービス提供基盤（Firebase）によって自動的に収集されるIPアドレスや端末の利用環境等のログデータ</p>
-
-      <p><strong>3. 利用目的</strong><br>
-      取得した情報は、以下の目的でのみ利用します。<br>
-      ・本サービスの提供・運営（ギャラリーへの画像、ユーザー名、アイコンの表示等）<br>
-      ・ユーザーからのお問い合わせ対応<br>
-      ・利用規約に違反したユーザーの特定および対応<br>
-      ・本サービスの改善、新機能の開発のための分析</p>
-
-      <p><strong>4. データの管理と第三者提供</strong><br>
-      ・本サービスは、データの保存にGoogle LLCが提供する「Firebase」を利用しています。データは強固なセキュリティ環境下で保管されます。<br>
-      ・運営者は、次に掲げる場合を除いて、あらかじめユーザーの同意を得ることなく第三者に個人情報を提供することはありません。<br>
-      　1. 法令に基づく場合<br>
-      　2. 人の生命、身体または財産の保護のために必要がある場合</p>
-
-      <p><strong>5. データの削除（退会）</strong><br>
-      ユーザーは、本サービス上で自身が投稿した画像データを任意に削除することができます。アカウント自体のご利用停止やデータの完全削除をご希望の場合は、以下の窓口までご連絡ください。</p>
-
-      <p><strong>6. お問い合わせ窓口</strong><br>
-      本ポリシーに関するお問い合わせは、以下のメールアドレス、またはSNSアカウントまでお願いいたします。<br>
-      メールアドレス：[★あなたのメールアドレスを記載★]<br>
-      X (旧Twitter)：[★あなたのアカウントURLを記載（任意）★]</p>
-      
+      <p><strong>1. 収集する個人情報</strong><br>本サービスはGoogleアカウントの内部識別子（UID）を取得しますが、本名やGoogleアイコンは公開されません。</p>
+      <p><strong>2. 利用目的</strong><br>本サービスの提供・運営、お問い合わせ対応のために利用します。</p>
+      <p><strong>3. お問い合わせ窓口</strong><br>メールアドレス：[★あなたのメールアドレスを記載★]</p>
     </div>
     <div style="margin-top:20px; text-align:center;">
       <button id="agreeBtn" style="padding:12px 30px; background:#2196f3; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; transition: 0.2s;">同意して利用を開始する</button>
@@ -290,7 +239,8 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  // ★ setDoc, getDoc, where を追加
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const firebaseConfig = {
@@ -311,12 +261,36 @@
   let agreedToTerms = false;
   let images = [];
   let currentAuthUser = null;
+  
+  // ★ 追加：現在のユーザープロフィール情報
+  let currentUserProfile = {
+    nickname: "匿名ユーザー",
+    iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"
+  };
 
   let displayCount = 12; 
   const LOAD_STEP = 12;  
 
   function showSpinner() { document.getElementById("loadingSpinner").style.display = "flex"; }
   function hideSpinner() { document.getElementById("loadingSpinner").style.display = "none"; }
+
+  function showModal(modal) { modal.style.display = "flex"; }
+  function hideModal(modal) { modal.style.display = "none"; }
+
+  // ★ 追加：Firestoreからプロフィール情報を取得（なければデフォルトを作成）
+  async function loadUserProfile(uid) {
+    try {
+      const userSnap = await getDoc(doc(db, "users", uid));
+      if (userSnap.exists()) {
+        currentUserProfile = userSnap.data();
+      } else {
+        // 初回ログイン時はランダムな英数字の名前を付与
+        const randomName = "ユーザー" + uid.substring(0, 5);
+        currentUserProfile.nickname = randomName;
+        await setDoc(doc(db, "users", uid), currentUserProfile);
+      }
+    } catch(e) { console.error("プロフィールの読み込みに失敗しました:", e); }
+  }
 
   function showMainContent() {
     document.getElementById("unauthorizedMain").style.display = "none";
@@ -331,9 +305,6 @@
     loadPhotos();
   }
 
-  function showModal(modal) { modal.style.display = "flex"; }
-  function hideModal(modal) { modal.style.display = "none"; }
-
   document.getElementById("showTermsBtnUnauthorized").onclick = () => showModal(document.getElementById("termsModal"));
   document.getElementById("closeTermsBtn").onclick = () => hideModal(document.getElementById("termsModal"));
   
@@ -341,10 +312,7 @@
     agreedToTerms = true;
     hideModal(document.getElementById("termsModal"));
     showSpinner();
-    signInWithPopup(auth, provider).catch(error => {
-      console.error(error);
-      alert("ログインに失敗しました。\n・LINEなどのアプリ内ブラウザを使っている場合はSafariやChromeで開き直してください。\n・エラー詳細: " + error.message);
-    }).finally(() => hideSpinner());
+    signInWithPopup(auth, provider).catch(error => { alert("ログインに失敗しました。"); }).finally(() => hideSpinner());
   };
 
   document.getElementById("signInBtnUnauthorized").onclick = () => {
@@ -352,10 +320,7 @@
       showModal(document.getElementById("termsModal"));
     } else {
       showSpinner();
-      signInWithPopup(auth, provider).catch(error => {
-        console.error(error);
-        alert("ログインに失敗しました。\n・LINEなどのアプリ内ブラウザを使っている場合はSafariやChromeで開き直してください。\n・エラー詳細: " + error.message);
-      }).finally(() => hideSpinner());
+      signInWithPopup(auth, provider).catch(error => { alert("ログインに失敗しました。"); }).finally(() => hideSpinner());
     }
   };
 
@@ -364,9 +329,11 @@
     signOut(auth).finally(() => hideSpinner());
   };
 
-  onAuthStateChanged(auth, user => {
+  // ★ 変更：ログイン状態がわかったらプロフィールも取得する
+  onAuthStateChanged(auth, async user => {
     if (user) {
       currentAuthUser = user;
+      await loadUserProfile(user.uid);
       showMainContent();
     } else {
       showUnauthorizedMainContent();
@@ -408,9 +375,7 @@
   }
 
   function renderGallery(resetCount = true) {
-    if (resetCount) {
-      displayCount = LOAD_STEP; 
-    }
+    if (resetCount) { displayCount = LOAD_STEP; }
 
     const filter = document.getElementById("searchBox").value;
     const sortMode = document.getElementById("sortSelect").value;
@@ -446,7 +411,7 @@
       const hasLiked = currentAuthUser && img.likes && img.likes.includes(currentAuthUser.uid);
       const heartClass = hasLiked ? "active" : "inactive";
 
-      const userName = img.userName || "名無しユーザー";
+      const userName = img.userName || "匿名ユーザー";
       const userIcon = img.userIcon || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 
       item.innerHTML = `
@@ -454,9 +419,7 @@
           <img src="${userIcon}" alt="icon" class="user-icon" loading="lazy">
           <span class="user-name">${userName}</span>
         </div>
-        
         <img src="${img.file}" alt="${img.tag}" class="thumb" loading="lazy">
-        
         <div class="info">
           <span class="tag">#${img.tag}</span>
           <div class="like-area">
@@ -481,14 +444,9 @@
 
       item.querySelector(".like-icon").onclick = async (e) => {
         e.stopPropagation();
-        if (!currentAuthUser) {
-          alert("いいねするにはログインが必要です。");
-          return;
-        }
-
+        if (!currentAuthUser) return alert("いいねするにはログインが必要です。");
         const docId = e.target.dataset.id;
         const photoRef = doc(db, "photos", docId);
-        
         document.getElementById("loadingSpinner").style.display = "flex";
         try {
           if (hasLiked) {
@@ -497,11 +455,8 @@
             await updateDoc(photoRef, { likes: arrayUnion(currentAuthUser.uid) });
           }
           await loadPhotos(true);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          document.getElementById("loadingSpinner").style.display = "none";
-        }
+        } catch (error) { console.error(error); } 
+        finally { document.getElementById("loadingSpinner").style.display = "none"; }
       };
 
       if (isOwner) {
@@ -521,10 +476,8 @@
           modal.dataset.file = img.file;
         };
       }
-      
       fragment.appendChild(item);
     });
-    
     gallery.appendChild(fragment);
   }
 
@@ -535,7 +488,6 @@
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
       const filter = document.getElementById("searchBox").value;
       const filtered = images.filter(img => img.tag.includes(filter));
-      
       if (displayCount < filtered.length) {
         displayCount += LOAD_STEP; 
         renderGallery(false); 
@@ -543,22 +495,81 @@
     }
   });
 
+  // ===== プロフィール設定処理 =====
+  document.getElementById("profileSettingsBtn").onclick = () => {
+    document.getElementById("profileNicknameInput").value = currentUserProfile.nickname || "";
+    const preview = document.getElementById("currentProfileIconPreview");
+    if(currentUserProfile.iconUrl && !currentUserProfile.iconUrl.includes("<svg")) {
+      preview.src = currentUserProfile.iconUrl;
+      preview.style.display = "block";
+    } else {
+      preview.style.display = "none";
+    }
+    showModal(document.getElementById("profileModal"));
+  };
+
+  document.getElementById("cancelProfileBtn").onclick = () => hideModal(document.getElementById("profileModal"));
+
+  document.getElementById("saveProfileBtn").onclick = async () => {
+    const newNickname = document.getElementById("profileNicknameInput").value.trim();
+    if (!newNickname) return alert("ニックネームを入力してください");
+    const file = document.getElementById("profileIconInput").files[0];
+    
+    showSpinner();
+    try {
+      let newIconUrl = currentUserProfile.iconUrl;
+      // アイコン画像が選択されていればStorageにアップ（既存のアップロードルールを通るようにファイル名を工夫）
+      if (file) {
+        const compressedBlob = await compressImage(file, 0.4);
+        const fileName = `${auth.currentUser.uid}_icon_${Date.now()}`;
+        const iconRef = ref(storage, `uploads/${fileName}`);
+        const snapshot = await uploadBytes(iconRef, compressedBlob);
+        newIconUrl = await getDownloadURL(snapshot.ref);
+      }
+      
+      // 1. usersコレクションを更新
+      const newProfile = { nickname: newNickname, iconUrl: newIconUrl };
+      await setDoc(doc(db, "users", auth.currentUser.uid), newProfile, { merge: true });
+      currentUserProfile = newProfile;
+      
+      // 2. 過去の自分の投稿のアイコンと名前も一括で更新する
+      const myPhotosQ = query(collection(db, "photos"), where("userId", "==", auth.currentUser.uid));
+      const myPhotosSnap = await getDocs(myPhotosQ);
+      const updatePromises = [];
+      myPhotosSnap.forEach(docSnap => {
+        updatePromises.push(updateDoc(docSnap.ref, {
+          userName: newNickname,
+          userIcon: newIconUrl
+        }));
+      });
+      await Promise.all(updatePromises);
+      
+      alert("プロフィールを更新しました！");
+      hideModal(document.getElementById("profileModal"));
+      document.getElementById("profileIconInput").value = "";
+      await loadPhotos(true); // 画面をリロードして反映
+    } catch(e) {
+      alert("保存に失敗しました。");
+      console.error(e);
+    } finally {
+      hideSpinner();
+    }
+  };
+  // ============================
+
   document.getElementById("cancelEditBtn").onclick = () => hideModal(document.getElementById("editModal"));
   document.getElementById("saveEditBtn").onclick = async () => {
     const modal = document.getElementById("editModal");
     const newTag = document.getElementById("editTagInput").value.trim();
     const docId = modal.dataset.docId;
-    if (!newTag) return alert("新しいタグを入力してください");
-    if (!docId) return;
+    if (!newTag || !docId) return;
     showSpinner();
     try {
       await updateDoc(doc(db, "photos", docId), { tag: newTag });
       hideModal(modal);
       alert("タグを変更しました！");
       await loadPhotos(true); 
-    } catch(e) {
-      alert("編集に失敗しました。");
-    } finally { hideSpinner(); }
+    } catch(e) { alert("編集に失敗しました。"); } finally { hideSpinner(); }
   };
 
   document.getElementById("cancelDeleteBtn").onclick = () => hideModal(document.getElementById("deleteModal"));
@@ -573,7 +584,7 @@
         try {
           const fileRef = ref(storage, fileUrl);
           await deleteObject(fileRef);
-        } catch (storageError) { console.warn("Storageの画像削除に失敗:", storageError); }
+        } catch (e) {}
       }
       await deleteDoc(doc(db, "photos", docId));
       hideModal(modal);
@@ -585,14 +596,7 @@
 
   document.getElementById("downloadBtnDetailModal").onclick = async (e) => {
     e.stopPropagation();
-    if (!currentAuthUser) {
-        showSpinner();
-        signInWithPopup(auth, provider).then(() => {
-            currentAuthUser = auth.currentUser;
-            downloadImage();
-        }).catch(() => { alert("ダウンロードするにはログインが必要です"); }).finally(() => hideSpinner());
-        return;
-    }
+    if (!currentAuthUser) return alert("ダウンロードするにはログインが必要です");
     downloadImage();
   };
   
@@ -622,11 +626,10 @@
     const tag = document.getElementById("tagInput").value.trim();
     if (!file || !tag) return alert("ファイルとタグを入力してください");
 
-    // ★ 追加：アップロード前の商用利用に関する注意喚起（確認ダイアログ）
     const confirmUpload = confirm(
       "【重要：アップロード前の確認】\n\n投稿する写真は「商用利用可能なフリー素材」として他のユーザーに公開されます。\n\n・ご自身で撮影・作成した画像ですか？\n・他人の権利（著作権、肖像権など）を侵害していませんか？\n\n上記を確認し、同意してアップロードしますか？"
     );
-    if (!confirmUpload) return; // キャンセルした場合は処理を中断
+    if (!confirmUpload) return; 
 
     showSpinner();
     try {
@@ -636,12 +639,13 @@
       const snapshot = await uploadBytes(storageRef, compressedBlob);
       const url = await getDownloadURL(snapshot.ref);
 
+      // ★ 変更：Googleの情報ではなく、Firestoreのプロフィール情報を保存する
       await addDoc(collection(db, "photos"), {
         file: url,
         tag: tag,
         userId: auth.currentUser.uid,
-        userName: auth.currentUser.displayName || "ユーザー",
-        userIcon: auth.currentUser.photoURL || "",
+        userName: currentUserProfile.nickname,
+        userIcon: currentUserProfile.iconUrl,
         createdAt: new Date(),
         likes: [] 
       });
