@@ -267,10 +267,11 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  // ★ 修正：signInWithPopup を signInWithRedirect に変更し、getRedirectResult を追加
+  import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA905mJ-r1OxzV5n-f7fAC3D0keVV-GwGM",
@@ -305,6 +306,12 @@
   function showModal(modal) { modal.style.display = "flex"; }
   function hideModal(modal) { modal.style.display = "none"; }
 
+  // ★ 追加：リダイレクトで戻ってきた時のエラーをキャッチする処理
+  getRedirectResult(auth).catch((error) => {
+    console.error(error);
+    alert("ログイン処理中にエラーが発生しました。\n詳細: " + error.message);
+  });
+
   async function loadUserProfile(uid) {
     try {
       const userSnap = await getDoc(doc(db, "users", uid));
@@ -334,24 +341,27 @@
   document.getElementById("showTermsBtnUnauthorized").onclick = () => showModal(document.getElementById("termsModal"));
   document.getElementById("closeTermsBtn").onclick = () => hideModal(document.getElementById("termsModal"));
   
-  // ★エラーメッセージを詳細版に修正
+  // ★ 修正：signInWithRedirect（画面切り替え方式）に変更
   document.getElementById("agreeBtn").onclick = () => {
     agreedToTerms = true;
     hideModal(document.getElementById("termsModal"));
     showSpinner();
-    signInWithPopup(auth, provider).catch(error => { 
-      alert("ログインに失敗しました。\n・LINEなどのアプリ内ブラウザを使っている場合はSafariやChromeで開き直してください。\n・詳細: " + error.message); 
-    }).finally(() => hideSpinner());
+    signInWithRedirect(auth, provider).catch(error => { 
+      alert("ログイン画面への移動に失敗しました。\n・詳細: " + error.message); 
+      hideSpinner();
+    });
   };
 
+  // ★ 修正：signInWithRedirect（画面切り替え方式）に変更
   document.getElementById("signInBtnUnauthorized").onclick = () => {
     if (!agreedToTerms) {
       showModal(document.getElementById("termsModal"));
     } else {
       showSpinner();
-      signInWithPopup(auth, provider).catch(error => { 
-        alert("ログインに失敗しました。\n・LINEなどのアプリ内ブラウザを使っている場合はSafariやChromeで開き直してください。\n・詳細: " + error.message); 
-      }).finally(() => hideSpinner());
+      signInWithRedirect(auth, provider).catch(error => { 
+        alert("ログイン画面への移動に失敗しました。\n・詳細: " + error.message); 
+        hideSpinner();
+      });
     }
   };
 
@@ -444,7 +454,6 @@
       const userName = img.userName || "匿名ユーザー";
       const userIcon = img.userIcon || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 
-      // ★ 構文エラーを修正しました
       item.innerHTML = `
         <div class="user-profile">
           <img src="${userIcon}" alt="icon" class="user-icon" loading="lazy">
