@@ -98,22 +98,17 @@
 
     /* =========================================
        ★ スマホ向けレスポンシブデザイン
-       画面幅が600px以下の場合に適用されるスタイル
        ========================================= */
     @media (max-width: 600px) {
-      /* 右上のボタンを小さくして押しやすく */
       .header-buttons { top: 10px; right: 10px; gap: 5px; }
       .header-buttons button { padding: 6px 10px; font-size: 0.75em; }
       
-      /* 検索バーやモーダルを画面幅に合わせる */
       .action-box, .controls-area { width: 90%; padding: 15px; flex-direction: column; }
       #searchBox, #sortSelect { width: 100%; box-sizing: border-box; }
       
-      /* ギャラリーをスマホ用の2列表示にする */
       .gallery { padding: 10px; gap: 10px; }
-      .tile-item { width: 46%; min-width: 140px; } /* 半分より少し小さくして2列に */
+      .tile-item { width: 46%; min-width: 140px; } 
       
-      /* モーダルが画面からはみ出さないように */
       .simplified-modal-content { width: 90%; padding: 20px; }
     }
 
@@ -122,38 +117,18 @@
        ========================================= */
     .skeleton {
       background: #e0e0e0;
-      /* 光が左から右へ流れるようなグラデーション */
       background-image: linear-gradient(90deg, #e0e0e0 0px, #f5f5f5 40px, #e0e0e0 80px);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite linear;
     }
-    
     @keyframes shimmer {
       0% { background-position: 100% 0; }
       100% { background-position: -100% 0; }
     }
-
-    /* 画像を包む枠（ここにスケルトンを適用する） */
-    .img-wrapper {
-      position: relative;
-      width: 100%;
-      height: 150px;
-      background-color: #f0f0f0;
-    }
+    .img-wrapper { position: relative; width: 100%; height: 150px; background-color: #f0f0f0; }
     @media (max-width: 600px) { .img-wrapper { height: 120px; } }
-
-    /* 画像自体の設定（読み込まれるまでは透明にしておく） */
-    .img-wrapper img.thumb {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0; 
-      transition: opacity 0.3s ease; /* ふわっと表示させる */
-    }
-    /* 読み込み完了後に付与するクラス */
-    .img-wrapper img.thumb.loaded {
-      opacity: 1;
-    }
+    .img-wrapper img.thumb { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
+    .img-wrapper img.thumb.loaded { opacity: 1; }
   </style>
 </head>
 <body>
@@ -172,7 +147,6 @@
   </div>
   
   <div id="authorizedMain" style="display:none;">
-    <!-- ★ 右上のボタンをまとめる -->
     <div class="header-buttons">
       <button id="profileSettingsBtn" class="action-btn gray-btn" style="font-size: 0.85em; padding: 8px 15px;">プロフィール設定</button>
       <button id="signOutBtnAuthorized" class="link-btn" style="color: #fff; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 8px 15px;">ログアウト</button>
@@ -197,7 +171,6 @@
   <div class="gallery"></div>
 </div>
 
-<!-- ★ 追加：プロフィール設定モーダル -->
 <div id="profileModal" class="simplified-modal">
   <div id="profileModalContent" class="simplified-modal-content">
     <h2>プロフィール設定</h2>
@@ -219,7 +192,6 @@
   </div>
 </div>
 
-<!-- モーダル群 -->
 <div id="termsModal" class="simplified-modal">
   <div id="termsModalContent" class="simplified-modal-content">
     <div id="termsBox">
@@ -297,7 +269,6 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-  // ★ setDoc, getDoc, where を追加
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -320,7 +291,6 @@
   let images = [];
   let currentAuthUser = null;
   
-  // ★ 追加：現在のユーザープロフィール情報
   let currentUserProfile = {
     nickname: "匿名ユーザー",
     iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"
@@ -335,14 +305,12 @@
   function showModal(modal) { modal.style.display = "flex"; }
   function hideModal(modal) { modal.style.display = "none"; }
 
-  // ★ 追加：Firestoreからプロフィール情報を取得（なければデフォルトを作成）
   async function loadUserProfile(uid) {
     try {
       const userSnap = await getDoc(doc(db, "users", uid));
       if (userSnap.exists()) {
         currentUserProfile = userSnap.data();
       } else {
-        // 初回ログイン時はランダムな英数字の名前を付与
         const randomName = "ユーザー" + uid.substring(0, 5);
         currentUserProfile.nickname = randomName;
         await setDoc(doc(db, "users", uid), currentUserProfile);
@@ -366,11 +334,14 @@
   document.getElementById("showTermsBtnUnauthorized").onclick = () => showModal(document.getElementById("termsModal"));
   document.getElementById("closeTermsBtn").onclick = () => hideModal(document.getElementById("termsModal"));
   
+  // ★エラーメッセージを詳細版に修正
   document.getElementById("agreeBtn").onclick = () => {
     agreedToTerms = true;
     hideModal(document.getElementById("termsModal"));
     showSpinner();
-    signInWithPopup(auth, provider).catch(error => { alert("ログインに失敗しました。"); }).finally(() => hideSpinner());
+    signInWithPopup(auth, provider).catch(error => { 
+      alert("ログインに失敗しました。\n・LINEなどのアプリ内ブラウザを使っている場合はSafariやChromeで開き直してください。\n・詳細: " + error.message); 
+    }).finally(() => hideSpinner());
   };
 
   document.getElementById("signInBtnUnauthorized").onclick = () => {
@@ -378,7 +349,9 @@
       showModal(document.getElementById("termsModal"));
     } else {
       showSpinner();
-      signInWithPopup(auth, provider).catch(error => { alert("ログインに失敗しました。"); }).finally(() => hideSpinner());
+      signInWithPopup(auth, provider).catch(error => { 
+        alert("ログインに失敗しました。\n・LINEなどのアプリ内ブラウザを使っている場合はSafariやChromeで開き直してください。\n・詳細: " + error.message); 
+      }).finally(() => hideSpinner());
     }
   };
 
@@ -387,7 +360,6 @@
     signOut(auth).finally(() => hideSpinner());
   };
 
-  // ★ 変更：ログイン状態がわかったらプロフィールも取得する
   onAuthStateChanged(auth, async user => {
     if (user) {
       currentAuthUser = user;
@@ -472,8 +444,8 @@
       const userName = img.userName || "匿名ユーザー";
       const userIcon = img.userIcon || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 
+      // ★ 構文エラーを修正しました
       item.innerHTML = `
-        item.innerHTML = `
         <div class="user-profile">
           <img src="${userIcon}" alt="icon" class="user-icon" loading="lazy">
           <span class="user-name">${userName}</span>
@@ -498,6 +470,7 @@
           </div>
         ` : ""}
       `;
+
       item.querySelector(".thumb").onclick = () => {
         const modal = document.getElementById("detailModal");
         document.getElementById("detailModalImg").src = img.file;
@@ -558,7 +531,6 @@
     }
   });
 
-  // ===== プロフィール設定処理 =====
   document.getElementById("profileSettingsBtn").onclick = () => {
     document.getElementById("profileNicknameInput").value = currentUserProfile.nickname || "";
     const preview = document.getElementById("currentProfileIconPreview");
@@ -581,7 +553,6 @@
     showSpinner();
     try {
       let newIconUrl = currentUserProfile.iconUrl;
-      // アイコン画像が選択されていればStorageにアップ（既存のアップロードルールを通るようにファイル名を工夫）
       if (file) {
         const compressedBlob = await compressImage(file, 0.4);
         const fileName = `${auth.currentUser.uid}_icon_${Date.now()}`;
@@ -590,12 +561,10 @@
         newIconUrl = await getDownloadURL(snapshot.ref);
       }
       
-      // 1. usersコレクションを更新
       const newProfile = { nickname: newNickname, iconUrl: newIconUrl };
       await setDoc(doc(db, "users", auth.currentUser.uid), newProfile, { merge: true });
       currentUserProfile = newProfile;
       
-      // 2. 過去の自分の投稿のアイコンと名前も一括で更新する
       const myPhotosQ = query(collection(db, "photos"), where("userId", "==", auth.currentUser.uid));
       const myPhotosSnap = await getDocs(myPhotosQ);
       const updatePromises = [];
@@ -610,7 +579,7 @@
       alert("プロフィールを更新しました！");
       hideModal(document.getElementById("profileModal"));
       document.getElementById("profileIconInput").value = "";
-      await loadPhotos(true); // 画面をリロードして反映
+      await loadPhotos(true); 
     } catch(e) {
       alert("保存に失敗しました。");
       console.error(e);
@@ -618,7 +587,6 @@
       hideSpinner();
     }
   };
-  // ============================
 
   document.getElementById("cancelEditBtn").onclick = () => hideModal(document.getElementById("editModal"));
   document.getElementById("saveEditBtn").onclick = async () => {
@@ -702,7 +670,6 @@
       const snapshot = await uploadBytes(storageRef, compressedBlob);
       const url = await getDownloadURL(snapshot.ref);
 
-      // ★ 変更：Googleの情報ではなく、Firestoreのプロフィール情報を保存する
       await addDoc(collection(db, "photos"), {
         file: url,
         tag: tag,
