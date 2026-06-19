@@ -3,177 +3,699 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>都市ギャラリー（CSV対応）</title>
+  <title>まちフォト</title>
   <style>
-    body {
-      font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
-      background: #f8f8f8;
-      margin: 0;
-      text-align: center;
+    /* 全体デザイン・カラー設定 */
+    :root {
+      --main-blue: #2196f3;
+      --グレー: #757575; 
+      --ピンク: #e91e63; 
+      --オレンジ: #ff9800; 
+      --背景: #f8f8f8;
+      --コンポーネント背景: white;
+      
+      --hover-scale: 1.05;
+      --hover-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      --transition-speed: 0.2s;
+    }
+    body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: var(--背景); margin: 0; text-align: center; }
+    header { background: var(--main-blue); color: white; padding: 20px 0; font-size: 1.6em; letter-spacing: 2px; }
+    
+    .main-content { padding: 20px; }
+    
+    .unauthorized-box { background: var(--コンポーネント背景); padding: 30px; margin: 20px auto; max-width: 500px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .unauthorized-box p { margin-bottom: 20px; color: #555; }
+    
+    .link-btn { background: none; border: none; color: var(--グレー); font-size: 0.9em; cursor: pointer; text-decoration: underline; padding: 10px; transition: color var(--transition-speed), transform var(--transition-speed); }
+    .link-btn:hover { color: #333; transform: scale(var(--hover-scale)); }
+
+    /* ★ 右上のボタン配置調整 */
+    .header-buttons { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 100; }
+    .action-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-size: 1em; transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed); }
+    .action-btn:hover { transform: scale(var(--hover-scale)); box-shadow: var(--hover-shadow); }
+    
+    .pink-btn { background: var(--ピンク); color: white; }
+    .blue-btn { background: var(--main-blue); color: white; }
+    .orange-btn { background: var(--オレンジ); color: white; }
+    .gray-btn { background: var(--グレー); color: white; }
+    
+    .action-box { background: var(--コンポーネント背景); padding: 20px; margin: 20px auto; max-width: 500px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: left; }
+    .action-box h3 { margin-top: 0; color: #333; }
+    .action-box input[type="file"] { margin-bottom: 10px; width: calc(100% - 20px); }
+    .action-box input[type="text"] { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
+
+    .controls-area { margin: 20px auto; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 600px; }
+    #searchBox { padding: 10px 20px; width: 60%; min-width: 200px; border: 2px solid var(--main-blue); border-radius: 25px; font-size: 1em; outline: none; transition: border-color var(--transition-speed); }
+    #searchBox:focus { border-color: var(--ピンク); }
+    #sortSelect { padding: 10px 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 1em; outline: none; background: white; cursor: pointer; }
+
+    .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+    .tile-item { position: relative; width: 220px; background: var(--コンポーネント背景); border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s ease; will-change: transform; overflow: hidden; cursor: pointer; text-align: left; }
+    .tile-item:hover { transform: scale(1.03) translateZ(0); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+    
+    .user-profile { padding: 10px 10px 5px; display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; }
+    .user-icon { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #eee; }
+    .user-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
+
+    .tile-item img.thumb { width: 100%; height: 150px; object-fit: cover; }
+    
+    .tile-item .info { padding: 5px 10px 10px; display: flex; justify-content: space-between; align-items: center; }
+    .tile-item .tag { background: var(--ピンク); color: white; display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
+
+    .like-area { display: flex; align-items: center; gap: 4px; font-size: 0.9em; font-weight: bold; }
+    .like-icon { cursor: pointer; font-size: 1.2em; transition: transform 0.2s; }
+    .like-icon:hover { transform: scale(1.2); }
+    .like-icon.active { color: var(--ピンク); }
+    .like-icon.inactive { color: #ccc; }
+
+    .tile-item-actions { position: absolute; top: 40px; right: 10px; display: none; flex-direction: column; gap: 5px; z-index: 10; }
+    .tile-item:hover .tile-item-actions { display: flex; }
+    .tile-item-actions button { padding: 5px 10px; border: none; border-radius: 5px; color: white; font-size: 0.7em; cursor: pointer; transition: transform var(--transition-speed); }
+    .tile-item-actions button:hover { transform: scale(1.1); }
+    .edit-btn { background: #4caf50; }
+    .delete-btn { background: #ff5252; }
+    
+    .simplified-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
+    .simplified-modal-content { background: var(--コンポーネント背景); padding: 30px; border-radius: 15px; text-align: left; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .simplified-modal h2 { margin-top: 0; color: #333; font-size: 1.4em; border-bottom: 2px solid var(--main-blue); padding-bottom: 10px; margin-bottom: 20px; }
+    .simplified-modal .content { color: #555; line-height: 1.6; margin-bottom: 20px; }
+    .simplified-modal .action-area { display: flex; justify-content: flex-end; gap: 10px; }
+
+    #termsModalContent { background: var(--グレー); color: white; }
+    #termsModalContent h2 { border-color: white; color: white; }
+    #termsModalContent .content { color: white; }
+    #editModalContent input { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px; }
+    
+    #detailModalContent { text-align: center; }
+    #detailModalContent img { max-width: 90%; max-height: 80%; border-radius: 8px; margin-bottom: 20px; }
+    #detailModalContent .tag { background: var(--ピンク); color: white; display: inline-block; padding: 8px 15px; border-radius: 20px; font-size: 1em; }
+    #detailModalContent .save-btn { background: var(--オレンジ); color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 1em; margin-top: 20px; }
+
+    .spinner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 9999; }
+    .spinner { width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.3); border-top: 5px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+    .spinner-text { color: white; font-weight: bold; letter-spacing: 2px; font-size: 1.1em; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* =========================================
+       ★ スマホ向けレスポンシブデザイン
+       ========================================= */
+    @media (max-width: 600px) {
+      .header-buttons { top: 10px; right: 10px; gap: 5px; }
+      .header-buttons button { padding: 6px 10px; font-size: 0.75em; }
+      
+      .action-box, .controls-area { width: 90%; padding: 15px; flex-direction: column; }
+      #searchBox, #sortSelect { width: 100%; box-sizing: border-box; }
+      
+      .gallery { padding: 10px; gap: 10px; }
+      .tile-item { width: 46%; min-width: 140px; } 
+      
+      .simplified-modal-content { width: 90%; padding: 20px; }
     }
 
-    header {
-      background: #2196f3;
-      color: white;
-      padding: 20px 0;
-      font-size: 1.6em;
-      letter-spacing: 2px;
+    /* =========================================
+       ★ スケルトンスクリーン（読み込み中の骨組み）
+       ========================================= */
+    .skeleton {
+      background: #e0e0e0;
+      background-image: linear-gradient(90deg, #e0e0e0 0px, #f5f5f5 40px, #e0e0e0 80px);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite linear;
     }
-
-    #searchBox {
-      margin: 20px;
-      padding: 10px 20px;
-      width: 60%;
-      max-width: 400px;
-      border: 2px solid #2196f3;
-      border-radius: 25px;
-      font-size: 1em;
-      outline: none;
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
     }
-
-    .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .gallery-item {
-      width: 220px;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    img {
-      width: 220px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
-    }
-
-    img:hover {
-      transform: scale(1.05);
-    }
-
-    .tag {
-      margin-top: 8px;
-      background: #eee;
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 0.9em;
-    }
-
-    /* モーダル */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-
-    .modal img {
-      width: 80%;
-      height: auto;
-      max-width: 900px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255,255,255,0.5);
-    }
-
-    .modal p {
-      color: white;
-      font-size: 1.2em;
-      margin-top: 10px;
-    }
+    .img-wrapper { position: relative; width: 100%; height: 150px; background-color: #f0f0f0; }
+    @media (max-width: 600px) { .img-wrapper { height: 120px; } }
+    .img-wrapper img.thumb { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
+    .img-wrapper img.thumb.loaded { opacity: 1; }
   </style>
 </head>
 <body>
-  <header>都市ギャラリー</header>
 
-  <input type="text" id="searchBox" placeholder="都市名で検索（例：札幌、神戸、東京）">
+<header>まちフォト</header>
 
-  <div class="gallery"></div>
-
-  <div class="modal" id="modal">
-    <div>
-      <img src="" alt="">
-      <p id="modalTag"></p>
+<div class="main-content">
+  <div id="unauthorizedMain">
+    <div class="unauthorized-box">
+      <p>「まちフォト」へようこそ！<br>
+      写真を投稿するにはログインが必要です。<br>
+      利用規約をご確認の上、ログインしてください。</p>
+      <button id="showTermsBtnUnauthorized" class="link-btn">利用規約を見る</button>
+      <button id="signInBtnUnauthorized" class="action-btn pink-btn">Googleでログイン</button>
     </div>
   </div>
+  
+  <div id="authorizedMain" style="display:none;">
+    <div class="header-buttons">
+      <button id="profileSettingsBtn" class="action-btn gray-btn" style="font-size: 0.85em; padding: 8px 15px;">プロフィール設定</button>
+      <button id="signOutBtnAuthorized" class="link-btn" style="color: #fff; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 8px 15px;">ログアウト</button>
+    </div>
+    
+    <div id="uploadArea" class="action-box">
+      <h3>新しい写真をアップロード</h3>
+      <input type="file" id="fileInput" accept="image/*">
+      <input type="text" id="tagInput" placeholder="タグ（例：札幌）">
+      <button id="uploadBtnAuthorized" class="action-btn blue-btn">アップロード</button>
+    </div>
+  </div>
+  
+  <div class="controls-area">
+    <input type="text" id="searchBox" placeholder="タグで検索...">
+    <select id="sortSelect">
+      <option value="newest">新着順</option>
+      <option value="popular">高評価順</option>
+    </select>
+  </div>
 
-  <script>
-    const gallery = document.querySelector(".gallery");
-    const modal = document.getElementById("modal");
-    const modalImg = modal.querySelector("img");
-    const modalTag = document.getElementById("modalTag");
-    const searchBox = document.getElementById("searchBox");
-    let images = [];
+  <div class="gallery"></div>
+</div>
 
-    // CSVを読み込む関数
-    async function loadCSV() {
-      try {
-        const response = await fetch("data.csv"); // 同じフォルダにあるCSVを読み込む
-        if (!response.ok) throw new Error("CSVファイルが見つかりません。");
-        const data = await response.text();
+<div id="profileModal" class="simplified-modal">
+  <div id="profileModalContent" class="simplified-modal-content">
+    <h2>プロフィール設定</h2>
+    <div class="content">
+      <p style="font-size: 0.9em;">他のユーザーに公開されるニックネームとアイコンを設定します。<br>※Googleアカウントの本名やアイコンは公開されません。</p>
+      <label style="display:block; margin-bottom:5px; font-weight:bold;">ニックネーム</label>
+      <input type="text" id="profileNicknameInput" placeholder="例：カメラマン太郎" style="width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
+      
+      <label style="display:block; margin-bottom:5px; font-weight:bold;">アイコン画像 (任意)</label>
+      <input type="file" id="profileIconInput" accept="image/*" style="margin-bottom: 10px;">
+      <div style="margin-top:10px;">
+        <img id="currentProfileIconPreview" src="" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:none; border: 2px solid #ddd;">
+      </div>
+    </div>
+    <div class="action-area">
+      <button id="cancelProfileBtn" class="action-btn gray-btn">キャンセル</button>
+      <button id="saveProfileBtn" class="action-btn pink-btn">保存する</button>
+    </div>
+  </div>
+</div>
 
-        const lines = data.trim().split("\n").slice(1); // ヘッダーを除外
-        images = lines.map(line => {
-          const [file, tag] = line.split(",");
-          return { file: file.trim(), tag: tag.trim() };
-        });
+<div id="termsModal" class="simplified-modal">
+  <div id="termsModalContent" class="simplified-modal-content">
+    <div id="termsBox">
+    <h2>利用規約およびプライバシーポリシー</h2>
+    
+    <div style="max-height:50vh; overflow-y:auto; border:1px solid #eee; padding:15px; font-size: 0.85em; line-height: 1.7; background: #fafafa; color: #333; text-align: left;">
+      <h3 style="border-left: 4px solid #2196f3; padding-left: 8px; margin-top: 0;">【第1部：利用規約】</h3>
+      <p>この利用規約（以下「本規約」）は、「まちフォト」（以下「本サービス」）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。</p>
+      <p><strong>第1条（適用・同意）</strong><br>1. 本規約は、ユーザーと本サービスの運営者との間の、本サービスの利用に関わる一切の関係に適用されます。<br>2. ユーザーは、本サービスを利用した時点で、本規約に同意したものとみなされます。</p>
+      <p><strong>第2条（ユーザー登録とアカウント管理）</strong><br>1. 本サービスの一部機能を利用するにはログインが必要です。<br>2. ユーザーは自身のアカウントの不正利用を防止する責任を負います。</p>
+      <p><strong>第3条（禁止事項）</strong><br>ユーザーは、本サービスの利用にあたり、以下の行為をしてはなりません。<br>・法令または公序良俗に違反する行為<br>・<strong>他者の著作権、プライバシー権、肖像権を侵害する画像の投稿</strong><br>・個人を特定できる情報が明確に写り込んだ画像の投稿<br>・わいせつ、暴力的な内容の投稿</p>
+      <p><strong>第4条（投稿データの権利と「商用利用」の許諾）</strong><br>1. ユーザーが投稿した画像データの著作権は、ユーザー自身または正当な権利者に留保されます。<br>2. <strong>【重要】ユーザーは、本サービスに画像を投稿した時点で、他の全てのユーザーおよび運営者に対し、その画像の「無償かつ無期限の商用利用」を許諾したものとみなされます。</strong><br>3. 他人の著作物や、商用利用が許可されていない被写体が含まれる画像は絶対に投稿しないでください。</p>
+      <p><strong>第5条（免責事項）</strong><br>本サービスに起因して生じたあらゆる損害について運営者は一切の責任を負いません。</p>
+      <hr style="margin: 20px 0; border-top: 1px dashed #ccc;">
+      <h3 style="border-left: 4px solid #4caf50; padding-left: 8px;">【第2部：プライバシーポリシー】</h3>
+      <p><strong>1. 収集する個人情報</strong><br>本サービスはGoogleアカウントの内部識別子（UID）を取得しますが、本名やGoogleアイコンは公開されません。</p>
+      <p><strong>2. 利用目的</strong><br>本サービスの提供・運営、お問い合わせ対応のために利用します。</p>
+      <p><strong>3. お問い合わせ窓口</strong><br>メールアドレス：[★あなたのメールアドレスを記載★]</p>
+    </div>
+    <div style="margin-top:20px; text-align:center;">
+      <button id="agreeBtn" style="padding:12px 30px; background:#2196f3; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; transition: 0.2s;">同意して利用を開始する</button>
+      <button id="closeTermsBtn" style="padding:12px 20px; margin-left:10px; border:none; border-radius:5px; cursor:pointer; background:#ccc; transition: 0.2s;">同意しない</button>
+    </div>
+   </div>
+  </div>
+</div>
 
-        renderGallery();
-      } catch (error) {
-        gallery.innerHTML = `<p style="color:red;">CSVの読み込みに失敗しました。<br>${error.message}</p>`;
+<div id="detailModal" class="simplified-modal">
+  <div id="detailModalContent" class="simplified-modal-content">
+    <h2>画像詳細</h2>
+    <div class="content">
+      <img id="detailModalImg" src="" alt="">
+      <div id="detailModalTag" class="tag">#タグ</div>
+      <button id="downloadBtnDetailModal" class="action-btn save-btn">保存 ⬇</button>
+    </div>
+    <div class="action-area">
+      <button id="closeDetailBtn" class="action-btn gray-btn">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div id="deleteModal" class="simplified-modal">
+  <div id="deleteModalContent" class="simplified-modal-content">
+    <h2>削除の確認</h2>
+    <div class="content">
+      <p>この写真を本当に削除しますか？</p>
+      <p>削除した画像データは元に戻せません。</p>
+    </div>
+    <div class="action-area">
+      <button id="cancelDeleteBtn" class="action-btn gray-btn">キャンセル</button>
+      <button id="confirmDeleteBtn" class="action-btn orange-btn">削除する</button>
+    </div>
+  </div>
+</div>
+
+<div id="editModal" class="simplified-modal">
+  <div id="editModalContent" class="simplified-modal-content">
+    <h2>タグの編集</h2>
+    <div class="content">
+      <p>この写真のタグを変更しますか？</p>
+      <input type="text" id="editTagInput" placeholder="新しいタグ">
+    </div>
+    <div class="action-area">
+      <button id="cancelEditBtn" class="action-btn gray-btn">キャンセル</button>
+      <button id="saveEditBtn" class="action-btn pink-btn">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div id="loadingSpinner" class="spinner-overlay">
+  <div class="spinner"></div>
+  <div class="spinner-text">処理中...</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  // ★ 修正：signInWithPopup を signInWithRedirect に変更し、getRedirectResult を追加
+  import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA905mJ-r1OxzV5n-f7fAC3D0keVV-GwGM",
+    authDomain: "machi-photo.firebaseapp.com",
+    projectId: "machi-photo",
+    storageBucket: "machi-photo.firebasestorage.app",
+    messagingSenderId: "625685667366",
+    appId: "1:625685667366:web:3de33df7fe5bc75ccdd0e7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const storage = getStorage(app);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  let agreedToTerms = false;
+  let images = [];
+  let currentAuthUser = null;
+  
+  let currentUserProfile = {
+    nickname: "匿名ユーザー",
+    iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"
+  };
+
+  let displayCount = 12; 
+  const LOAD_STEP = 12;  
+
+  function showSpinner() { document.getElementById("loadingSpinner").style.display = "flex"; }
+  function hideSpinner() { document.getElementById("loadingSpinner").style.display = "none"; }
+
+  function showModal(modal) { modal.style.display = "flex"; }
+  function hideModal(modal) { modal.style.display = "none"; }
+
+  // ★ 追加：リダイレクトで戻ってきた時のエラーをキャッチする処理
+  getRedirectResult(auth).catch((error) => {
+    console.error(error);
+    alert("ログイン処理中にエラーが発生しました。\n詳細: " + error.message);
+  });
+
+  async function loadUserProfile(uid) {
+    try {
+      const userSnap = await getDoc(doc(db, "users", uid));
+      if (userSnap.exists()) {
+        currentUserProfile = userSnap.data();
+      } else {
+        const randomName = "ユーザー" + uid.substring(0, 5);
+        currentUserProfile.nickname = randomName;
+        await setDoc(doc(db, "users", uid), currentUserProfile);
       }
-    }
+    } catch(e) { console.error("プロフィールの読み込みに失敗しました:", e); }
+  }
 
-    // ギャラリー描画
-    function renderGallery(filter = "") {
-      gallery.innerHTML = "";
-      const filtered = images.filter(img => img.tag.includes(filter));
+  function showMainContent() {
+    document.getElementById("unauthorizedMain").style.display = "none";
+    document.getElementById("authorizedMain").style.display = "block";
+    loadPhotos();
+  }
 
-      if (filtered.length === 0) {
-        gallery.innerHTML = "<p>該当する画像がありません。</p>";
-        return;
-      }
+  function showUnauthorizedMainContent() {
+    document.getElementById("unauthorizedMain").style.display = "block";
+    document.getElementById("authorizedMain").style.display = "none";
+    currentAuthUser = null;
+    loadPhotos();
+  }
 
-      filtered.forEach(img => {
-        const item = document.createElement("div");
-        item.className = "gallery-item";
-        item.innerHTML = `
-          <img src="${img.file}" alt="${img.tag}">
-          <div class="tag">${img.tag}</div>
-        `;
-        gallery.appendChild(item);
+  document.getElementById("showTermsBtnUnauthorized").onclick = () => showModal(document.getElementById("termsModal"));
+  document.getElementById("closeTermsBtn").onclick = () => hideModal(document.getElementById("termsModal"));
+  
+  // ★ 修正：signInWithRedirect（画面切り替え方式）に変更
+  document.getElementById("agreeBtn").onclick = () => {
+    agreedToTerms = true;
+    hideModal(document.getElementById("termsModal"));
+    showSpinner();
+    signInWithRedirect(auth, provider).catch(error => { 
+      alert("ログイン画面への移動に失敗しました。\n・詳細: " + error.message); 
+      hideSpinner();
+    });
+  };
 
-        item.onclick = () => {
-          modalImg.src = img.file;
-          modalTag.textContent = img.tag;
-          modal.style.display = "flex";
-        };
+  // ★ 修正：signInWithRedirect（画面切り替え方式）に変更
+  document.getElementById("signInBtnUnauthorized").onclick = () => {
+    if (!agreedToTerms) {
+      showModal(document.getElementById("termsModal"));
+    } else {
+      showSpinner();
+      signInWithRedirect(auth, provider).catch(error => { 
+        alert("ログイン画面への移動に失敗しました。\n・詳細: " + error.message); 
+        hideSpinner();
       });
     }
+  };
 
-    // 検索イベント
-    searchBox.addEventListener("input", e => {
-      renderGallery(e.target.value);
+  document.getElementById("signOutBtnAuthorized").onclick = () => {
+    showSpinner();
+    signOut(auth).finally(() => hideSpinner());
+  };
+
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      currentAuthUser = user;
+      await loadUserProfile(user.uid);
+      showMainContent();
+    } else {
+      showUnauthorizedMainContent();
+    }
+  });
+
+  function compressImage(file, quality = 0.7) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (e) => img.src = e.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+      };
+      reader.readAsDataURL(file);
     });
+  }
 
-    // モーダル閉じる
-    modal.onclick = () => {
-      modal.style.display = "none";
-    };
+  async function loadPhotos(keepCount = false) {
+    showSpinner();
+    images = [];
+    try {
+      const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(docSnap => {
+        images.push({ ...docSnap.data(), docId: docSnap.id });
+      });
+      renderGallery(!keepCount); 
+    } catch (e) {
+      document.querySelector(".gallery").innerHTML = "<p>写真の取得に失敗しました。</p>";
+    } finally {
+      hideSpinner();
+    }
+  }
 
-    // 初期ロード
-    loadCSV();
-  </script>
+  function renderGallery(resetCount = true) {
+    if (resetCount) { displayCount = LOAD_STEP; }
+
+    const filter = document.getElementById("searchBox").value;
+    const sortMode = document.getElementById("sortSelect").value;
+    const gallery = document.querySelector(".gallery");
+    gallery.innerHTML = "";
+    
+    let filtered = images.filter(img => img.tag.includes(filter));
+
+    if (sortMode === "popular") {
+      filtered.sort((a, b) => {
+        const likesA = a.likes ? a.likes.length : 0;
+        const likesB = b.likes ? b.likes.length : 0;
+        return likesB - likesA;
+      });
+    } else {
+      filtered.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+    }
+
+    if (filtered.length === 0) {
+      gallery.innerHTML = "<p>写真がありません。</p>";
+      return;
+    }
+
+    const itemsToShow = filtered.slice(0, displayCount);
+    const fragment = document.createDocumentFragment();
+
+    itemsToShow.forEach(img => {
+      const item = document.createElement("div");
+      item.className = "tile-item";
+      
+      const isOwner = currentAuthUser && currentAuthUser.uid === img.userId;
+      const likesCount = img.likes ? img.likes.length : 0;
+      const hasLiked = currentAuthUser && img.likes && img.likes.includes(currentAuthUser.uid);
+      const heartClass = hasLiked ? "active" : "inactive";
+
+      const userName = img.userName || "匿名ユーザー";
+      const userIcon = img.userIcon || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+
+      item.innerHTML = `
+        <div class="user-profile">
+          <img src="${userIcon}" alt="icon" class="user-icon" loading="lazy">
+          <span class="user-name">${userName}</span>
+        </div>
+        
+        <div class="img-wrapper skeleton">
+          <img src="${img.file}" alt="${img.tag}" class="thumb" loading="lazy" 
+               onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
+        </div>
+        
+        <div class="info">
+          <span class="tag">#${img.tag}</span>
+          <div class="like-area">
+            <span class="like-icon ${heartClass}" data-id="${img.docId}">♥</span>
+            <span class="like-count" style="color: #555;">${likesCount}</span>
+          </div>
+        </div>
+        ${isOwner ? `
+          <div class="tile-item-actions">
+            <button class="edit-btn">編集</button>
+            <button class="delete-btn">削除</button>
+          </div>
+        ` : ""}
+      `;
+
+      item.querySelector(".thumb").onclick = () => {
+        const modal = document.getElementById("detailModal");
+        document.getElementById("detailModalImg").src = img.file;
+        document.getElementById("detailModalTag").textContent = `#${img.tag}`;
+        showModal(modal);
+      };
+
+      item.querySelector(".like-icon").onclick = async (e) => {
+        e.stopPropagation();
+        if (!currentAuthUser) return alert("いいねするにはログインが必要です。");
+        const docId = e.target.dataset.id;
+        const photoRef = doc(db, "photos", docId);
+        document.getElementById("loadingSpinner").style.display = "flex";
+        try {
+          if (hasLiked) {
+            await updateDoc(photoRef, { likes: arrayRemove(currentAuthUser.uid) });
+          } else {
+            await updateDoc(photoRef, { likes: arrayUnion(currentAuthUser.uid) });
+          }
+          await loadPhotos(true);
+        } catch (error) { console.error(error); } 
+        finally { document.getElementById("loadingSpinner").style.display = "none"; }
+      };
+
+      if (isOwner) {
+        item.querySelector(".edit-btn").onclick = (e) => {
+          e.stopPropagation();
+          const modal = document.getElementById("editModal");
+          document.getElementById("editTagInput").value = img.tag;
+          showModal(modal);
+          modal.dataset.docId = img.docId;
+        };
+
+        item.querySelector(".delete-btn").onclick = (e) => {
+          e.stopPropagation();
+          const modal = document.getElementById("deleteModal");
+          showModal(modal);
+          modal.dataset.docId = img.docId;
+          modal.dataset.file = img.file;
+        };
+      }
+      fragment.appendChild(item);
+    });
+    gallery.appendChild(fragment);
+  }
+
+  document.getElementById("searchBox").addEventListener("input", () => renderGallery(true));
+  document.getElementById("sortSelect").addEventListener("change", () => renderGallery(true));
+
+  window.addEventListener("scroll", () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+      const filter = document.getElementById("searchBox").value;
+      const filtered = images.filter(img => img.tag.includes(filter));
+      if (displayCount < filtered.length) {
+        displayCount += LOAD_STEP; 
+        renderGallery(false); 
+      }
+    }
+  });
+
+  document.getElementById("profileSettingsBtn").onclick = () => {
+    document.getElementById("profileNicknameInput").value = currentUserProfile.nickname || "";
+    const preview = document.getElementById("currentProfileIconPreview");
+    if(currentUserProfile.iconUrl && !currentUserProfile.iconUrl.includes("<svg")) {
+      preview.src = currentUserProfile.iconUrl;
+      preview.style.display = "block";
+    } else {
+      preview.style.display = "none";
+    }
+    showModal(document.getElementById("profileModal"));
+  };
+
+  document.getElementById("cancelProfileBtn").onclick = () => hideModal(document.getElementById("profileModal"));
+
+  document.getElementById("saveProfileBtn").onclick = async () => {
+    const newNickname = document.getElementById("profileNicknameInput").value.trim();
+    if (!newNickname) return alert("ニックネームを入力してください");
+    const file = document.getElementById("profileIconInput").files[0];
+    
+    showSpinner();
+    try {
+      let newIconUrl = currentUserProfile.iconUrl;
+      if (file) {
+        const compressedBlob = await compressImage(file, 0.4);
+        const fileName = `${auth.currentUser.uid}_icon_${Date.now()}`;
+        const iconRef = ref(storage, `uploads/${fileName}`);
+        const snapshot = await uploadBytes(iconRef, compressedBlob);
+        newIconUrl = await getDownloadURL(snapshot.ref);
+      }
+      
+      const newProfile = { nickname: newNickname, iconUrl: newIconUrl };
+      await setDoc(doc(db, "users", auth.currentUser.uid), newProfile, { merge: true });
+      currentUserProfile = newProfile;
+      
+      const myPhotosQ = query(collection(db, "photos"), where("userId", "==", auth.currentUser.uid));
+      const myPhotosSnap = await getDocs(myPhotosQ);
+      const updatePromises = [];
+      myPhotosSnap.forEach(docSnap => {
+        updatePromises.push(updateDoc(docSnap.ref, {
+          userName: newNickname,
+          userIcon: newIconUrl
+        }));
+      });
+      await Promise.all(updatePromises);
+      
+      alert("プロフィールを更新しました！");
+      hideModal(document.getElementById("profileModal"));
+      document.getElementById("profileIconInput").value = "";
+      await loadPhotos(true); 
+    } catch(e) {
+      alert("保存に失敗しました。");
+      console.error(e);
+    } finally {
+      hideSpinner();
+    }
+  };
+
+  document.getElementById("cancelEditBtn").onclick = () => hideModal(document.getElementById("editModal"));
+  document.getElementById("saveEditBtn").onclick = async () => {
+    const modal = document.getElementById("editModal");
+    const newTag = document.getElementById("editTagInput").value.trim();
+    const docId = modal.dataset.docId;
+    if (!newTag || !docId) return;
+    showSpinner();
+    try {
+      await updateDoc(doc(db, "photos", docId), { tag: newTag });
+      hideModal(modal);
+      alert("タグを変更しました！");
+      await loadPhotos(true); 
+    } catch(e) { alert("編集に失敗しました。"); } finally { hideSpinner(); }
+  };
+
+  document.getElementById("cancelDeleteBtn").onclick = () => hideModal(document.getElementById("deleteModal"));
+  document.getElementById("confirmDeleteBtn").onclick = async () => {
+    const modal = document.getElementById("deleteModal");
+    const docId = modal.dataset.docId;
+    const fileUrl = modal.dataset.file;
+    if (!docId) return;
+    showSpinner();
+    try {
+      if (fileUrl) {
+        try {
+          const fileRef = ref(storage, fileUrl);
+          await deleteObject(fileRef);
+        } catch (e) {}
+      }
+      await deleteDoc(doc(db, "photos", docId));
+      hideModal(modal);
+      alert("画像を削除しました。");
+      await loadPhotos(true); 
+    } catch (error) { alert("削除に失敗しました: " + error.message); } 
+    finally { hideSpinner(); }
+  };
+
+  document.getElementById("downloadBtnDetailModal").onclick = async (e) => {
+    e.stopPropagation();
+    if (!currentAuthUser) return alert("ダウンロードするにはログインが必要です");
+    downloadImage();
+  };
+  
+  async function downloadImage() {
+    showSpinner();
+    try {
+        const file = document.getElementById("detailModalImg").src;
+        const tag = document.getElementById("detailModalTag").textContent.replace("#", "");
+        const response = await fetch(file);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = `${tag}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+    } catch (err) { alert("保存に失敗しました。"); } 
+    finally { hideSpinner(); }
+  }
+
+  document.getElementById("closeDetailBtn").onclick = () => hideModal(document.getElementById("detailModal"));
+
+  document.getElementById("uploadBtnAuthorized").onclick = async () => {
+    const file = document.getElementById("fileInput").files[0];
+    const tag = document.getElementById("tagInput").value.trim();
+    if (!file || !tag) return alert("ファイルとタグを入力してください");
+
+    const confirmUpload = confirm(
+      "【重要：アップロード前の確認】\n\n投稿する写真は「商用利用可能なフリー素材」として他のユーザーに公開されます。\n\n・ご自身で撮影・作成した画像ですか？\n・他人の権利（著作権、肖像権など）を侵害していませんか？\n\n上記を確認し、同意してアップロードしますか？"
+    );
+    if (!confirmUpload) return; 
+
+    showSpinner();
+    try {
+      const compressedBlob = await compressImage(file, 0.7);
+      const fileName = `${auth.currentUser.uid}_${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, `uploads/${fileName}`);
+      const snapshot = await uploadBytes(storageRef, compressedBlob);
+      const url = await getDownloadURL(snapshot.ref);
+
+      await addDoc(collection(db, "photos"), {
+        file: url,
+        tag: tag,
+        userId: auth.currentUser.uid,
+        userName: currentUserProfile.nickname,
+        userIcon: currentUserProfile.iconUrl,
+        createdAt: new Date(),
+        likes: [] 
+      });
+
+      alert("アップロード成功！");
+      document.getElementById("fileInput").value = "";
+      document.getElementById("tagInput").value = "";
+      await loadPhotos(); 
+    } catch (error) { alert("アップロード失敗: " + error.message); } 
+    finally { hideSpinner(); }
+  };
+</script>
 </body>
 </html>
