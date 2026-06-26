@@ -75,8 +75,18 @@
     .like-icon.active { color: var(--ピンク); }
     .like-icon.inactive { color: #ccc; }
 
-    .tile-item-actions { position: absolute; top: 40px; right: 10px; display: none; flex-direction: column; gap: 5px; z-index: 10; }
-    .tile-item:hover .tile-item-actions { display: flex; }
+    /* ★ 修正：ホバー依存をやめ、メニュー切替ボタン方式に変更 */
+    .menu-toggle-btn {
+      position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+      border-radius: 50%; background: rgba(0,0,0,0.5); color: white;
+      border: none; font-size: 1.1em; line-height: 1; cursor: pointer;
+      z-index: 11; display: flex; align-items: center; justify-content: center;
+      transition: background-color var(--transition-speed), transform var(--transition-speed);
+    }
+    .menu-toggle-btn:hover { background: rgba(0,0,0,0.7); transform: scale(1.1); }
+
+    .tile-item-actions { position: absolute; top: 40px; right: 8px; display: none; flex-direction: column; gap: 5px; z-index: 10; }
+    .tile-item-actions.show { display: flex; }
     .tile-item-actions button { padding: 5px 10px; border: none; border-radius: 5px; color: white; font-size: 0.7em; cursor: pointer; transition: transform var(--transition-speed); }
     .tile-item-actions button:hover { transform: scale(1.1); }
     .edit-btn { background: #4caf50; }
@@ -136,6 +146,9 @@
     @media (max-width: 600px) { .img-wrapper { height: 120px; } }
     .img-wrapper img.thumb { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
     .img-wrapper img.thumb.loaded { opacity: 1; }
+    /* ★ 追加：画像読み込み失敗時の表示 */
+    .img-wrapper.load-error { display: flex; align-items: center; justify-content: center; background: #eee; animation: none; }
+    .img-wrapper.load-error::after { content: "画像を読み込めません"; color: #999; font-size: 0.8em; }
   </style>
 </head>
 <body>
@@ -405,18 +418,28 @@
     }
   });
 
+  // ★ 修正：エラーハンドリングを追加（reader/imgの読み込み失敗時にrejectする）
   function compressImage(file, quality = 0.7) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
       const reader = new FileReader();
-      reader.onload = (e) => img.src = e.target.result;
+      reader.onerror = () => reject(new Error("ファイルの読み込みに失敗しました"));
+      reader.onload = (e) => { img.src = e.target.result; };
+      img.onerror = () => reject(new Error("画像の読み込みに失敗しました（壊れた画像か非対応の形式の可能性があります）"));
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("画像の圧縮に失敗しました"));
+          }, "image/jpeg", quality);
+        } catch (err) {
+          reject(err);
+        }
       };
       reader.readAsDataURL(file);
     });
@@ -447,7 +470,8 @@
     const gallery = document.querySelector(".gallery");
     gallery.innerHTML = "";
     
-    let filtered = images.filter(img => img.tag.includes(filter));
+    // ★ 修正：tagフィールドが存在しないデータでも落ちないようにガードを追加
+    let filtered = images.filter(img => (img.tag || "").includes(filter));
 
     if (sortMode === "popular") {
       filtered.sort((a, b) => {
@@ -456,7 +480,12 @@
         return likesB - likesA;
       });
     } else {
-      filtered.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+      // ★ 修正：createdAtが無い／不正なデータでも落ちないようにガードを追加
+      filtered.sort((a, b) => {
+        const tb = b.createdAt && typeof b.createdAt.toMillis === "function" ? b.createdAt.toMillis() : 0;
+        const ta = a.createdAt && typeof a.createdAt.toMillis === "function" ? a.createdAt.toMillis() : 0;
+        return tb - ta;
+      });
     }
 
     if (filtered.length === 0) {
@@ -478,6 +507,8 @@
 
       const userName = img.userName || "匿名ユーザー";
       const userIcon = img.userIcon || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+      // ★ 修正：tag欠損データの表示フォールバック
+      const tagText = img.tag || "タグなし";
 
       item.innerHTML = `
         <div class="user-profile">
@@ -486,18 +517,20 @@
         </div>
         
         <div class="img-wrapper skeleton">
-          <img src="${img.file}" alt="${img.tag}" class="thumb" loading="lazy" 
-               onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
+          <img src="${img.file}" alt="${tagText}" class="thumb" loading="lazy" 
+               onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');"
+               onerror="this.parentElement.classList.remove('skeleton'); this.parentElement.classList.add('load-error'); this.style.display='none';">
         </div>
         
         <div class="info">
-          <span class="tag">#${img.tag}</span>
+          <span class="tag">#${tagText}</span>
           <div class="like-area">
             <span class="like-icon ${heartClass}" data-id="${img.docId}">♥</span>
             <span class="like-count" style="color: #555;">${likesCount}</span>
           </div>
         </div>
         ${isOwner ? `
+          <button class="menu-toggle-btn" type="button" aria-label="メニュー">⋮</button>
           <div class="tile-item-actions">
             <button class="edit-btn">編集</button>
             <button class="delete-btn">削除</button>
@@ -508,7 +541,7 @@
       item.querySelector(".thumb").onclick = () => {
         const modal = document.getElementById("detailModal");
         document.getElementById("detailModalImg").src = img.file;
-        document.getElementById("detailModalTag").textContent = `#${img.tag}`;
+        document.getElementById("detailModalTag").textContent = `#${tagText}`;
         showModal(modal);
       };
 
@@ -529,17 +562,30 @@
         finally { document.getElementById("loadingSpinner").style.display = "none"; }
       };
 
+      // ★ 修正：ホバーではなく「︙」ボタンのタップでメニュー開閉する方式に変更
       if (isOwner) {
+        const menuBtn = item.querySelector(".menu-toggle-btn");
+        const actionsBox = item.querySelector(".tile-item-actions");
+
+        menuBtn.onclick = (e) => {
+          e.stopPropagation();
+          const isOpen = actionsBox.classList.contains("show");
+          document.querySelectorAll(".tile-item-actions.show").forEach(el => el.classList.remove("show"));
+          if (!isOpen) actionsBox.classList.add("show");
+        };
+
         item.querySelector(".edit-btn").onclick = (e) => {
           e.stopPropagation();
+          actionsBox.classList.remove("show");
           const modal = document.getElementById("editModal");
-          document.getElementById("editTagInput").value = img.tag;
+          document.getElementById("editTagInput").value = img.tag || "";
           showModal(modal);
           modal.dataset.docId = img.docId;
         };
 
         item.querySelector(".delete-btn").onclick = (e) => {
           e.stopPropagation();
+          actionsBox.classList.remove("show");
           const modal = document.getElementById("deleteModal");
           showModal(modal);
           modal.dataset.docId = img.docId;
@@ -551,13 +597,20 @@
     gallery.appendChild(fragment);
   }
 
+  // ★ 追加：メニュー外をタップしたら開いているメニューを閉じる
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".tile-item-actions") && !e.target.closest(".menu-toggle-btn")) {
+      document.querySelectorAll(".tile-item-actions.show").forEach(el => el.classList.remove("show"));
+    }
+  });
+
   document.getElementById("searchBox").addEventListener("input", () => renderGallery(true));
   document.getElementById("sortSelect").addEventListener("change", () => renderGallery(true));
 
   window.addEventListener("scroll", () => {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
       const filter = document.getElementById("searchBox").value;
-      const filtered = images.filter(img => img.tag.includes(filter));
+      const filtered = images.filter(img => (img.tag || "").includes(filter));
       if (displayCount < filtered.length) {
         displayCount += LOAD_STEP; 
         renderGallery(false); 
@@ -579,11 +632,14 @@
 
   document.getElementById("cancelProfileBtn").onclick = () => hideModal(document.getElementById("profileModal"));
 
+  // ★ 修正：保存ボタンの多重クリック防止のため、処理中は無効化する
   document.getElementById("saveProfileBtn").onclick = async () => {
+    const saveBtn = document.getElementById("saveProfileBtn");
     const newNickname = document.getElementById("profileNicknameInput").value.trim();
     if (!newNickname) return alert("ニックネームを入力してください");
     const file = document.getElementById("profileIconInput").files[0];
     
+    saveBtn.disabled = true;
     showSpinner();
     try {
       let newIconUrl = currentUserProfile.iconUrl;
@@ -615,48 +671,57 @@
       document.getElementById("profileIconInput").value = "";
       await loadPhotos(true); 
     } catch(e) {
-      alert("保存に失敗しました。");
+      alert("保存に失敗しました。\n詳細: " + e.message);
       console.error(e);
     } finally {
       hideSpinner();
+      saveBtn.disabled = false;
     }
   };
 
   document.getElementById("cancelEditBtn").onclick = () => hideModal(document.getElementById("editModal"));
   document.getElementById("saveEditBtn").onclick = async () => {
+    const saveBtn = document.getElementById("saveEditBtn");
     const modal = document.getElementById("editModal");
     const newTag = document.getElementById("editTagInput").value.trim();
     const docId = modal.dataset.docId;
     if (!newTag || !docId) return;
+    saveBtn.disabled = true;
     showSpinner();
     try {
       await updateDoc(doc(db, "photos", docId), { tag: newTag });
       hideModal(modal);
       alert("タグを変更しました！");
       await loadPhotos(true); 
-    } catch(e) { alert("編集に失敗しました。"); } finally { hideSpinner(); }
+    } catch(e) { alert("編集に失敗しました。"); } 
+    finally { hideSpinner(); saveBtn.disabled = false; }
   };
 
   document.getElementById("cancelDeleteBtn").onclick = () => hideModal(document.getElementById("deleteModal"));
   document.getElementById("confirmDeleteBtn").onclick = async () => {
+    const confirmBtn = document.getElementById("confirmDeleteBtn");
     const modal = document.getElementById("deleteModal");
     const docId = modal.dataset.docId;
     const fileUrl = modal.dataset.file;
     if (!docId) return;
+    confirmBtn.disabled = true;
     showSpinner();
     try {
       if (fileUrl) {
         try {
           const fileRef = ref(storage, fileUrl);
           await deleteObject(fileRef);
-        } catch (e) {}
+        } catch (e) {
+          // ★ 修正：失敗を握りつぶさずログに残す（Firestoreのドキュメント削除は続行する）
+          console.warn("ストレージ上の画像削除に失敗しました（ファイルが既に存在しない可能性があります）:", e);
+        }
       }
       await deleteDoc(doc(db, "photos", docId));
       hideModal(modal);
       alert("画像を削除しました。");
       await loadPhotos(true); 
     } catch (error) { alert("削除に失敗しました: " + error.message); } 
-    finally { hideSpinner(); }
+    finally { hideSpinner(); confirmBtn.disabled = false; }
   };
 
   document.getElementById("downloadBtnDetailModal").onclick = async (e) => {
@@ -686,7 +751,9 @@
 
   document.getElementById("closeDetailBtn").onclick = () => hideModal(document.getElementById("detailModal"));
 
+  // ★ 修正：アップロードボタンの多重クリック防止のため、処理中は無効化する
   document.getElementById("uploadBtnAuthorized").onclick = async () => {
+    const uploadBtn = document.getElementById("uploadBtnAuthorized");
     const file = document.getElementById("fileInput").files[0];
     const tag = document.getElementById("tagInput").value.trim();
     if (!file || !tag) return alert("ファイルとタグを入力してください");
@@ -696,6 +763,7 @@
     );
     if (!confirmUpload) return; 
 
+    uploadBtn.disabled = true;
     showSpinner();
     try {
       const compressedBlob = await compressImage(file, 0.7);
@@ -719,7 +787,7 @@
       document.getElementById("tagInput").value = "";
       await loadPhotos(); 
     } catch (error) { alert("アップロード失敗: " + error.message); } 
-    finally { hideSpinner(); }
+    finally { hideSpinner(); uploadBtn.disabled = false; }
   };
 </script>
 </body>
