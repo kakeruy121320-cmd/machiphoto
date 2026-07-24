@@ -1050,7 +1050,7 @@
     uploadBtn.disabled = true;
     showSpinner();
   
- 
+ try {
       const compressedBlob = await compressImage(file, 0.7);
       const ext = compressedBlob.type === "image/png" ? "png" : "jpg";
       const fileName = `${auth.currentUser.uid}_${Date.now()}.${ext}`;
