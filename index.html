@@ -214,7 +214,6 @@
       <h3>新しい写真をアップロード</h3>
       <input type="file" id="fileInput" accept="image/*">
       <input type="text" id="tagInput" placeholder="タグ（例：札幌）" maxlength="30">
-      <p class="upload-quota-text" id="uploadQuotaText">本日のアップロード可能枚数を確認中...</p>
       <button id="uploadBtnAuthorized" class="action-btn blue-btn">アップロード</button>
     </div>
   </div>
@@ -384,8 +383,7 @@
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
   import {
     getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy,
-    updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where, limit, startAfter,
-    runTransaction
+    updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where, limit, startAfter
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import {
     getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, deleteUser
@@ -413,9 +411,6 @@
     nickname: "匿名ユーザー",
     iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"
   };
- 
-  // ★ 追加：1日のアップロード上限
-  const DAILY_UPLOAD_LIMIT = 20;
  
   // ================================================================
   // ★ 修正（懸念点1）：写真の取得方法をページネーション方式に変更
@@ -479,7 +474,6 @@
   function showMainContent() {
     document.getElementById("unauthorizedMain").style.display = "none";
     document.getElementById("authorizedMain").style.display = "block";
-    refreshUploadQuotaText();
     loadInitialPhotos();
   }
  
@@ -1042,58 +1036,6 @@
  
   document.getElementById("closeDetailBtn").onclick = () => hideModal(document.getElementById("detailModal"));
  
-  // ================================================================
-  // ★ 追加（懸念点2）：1日のアップロード上限のチェック・表示
-  // ================================================================
-  function todayDateStr() {
-    const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  }
- 
-  async function getTodayUploadCount(uid) {
-    const counterId = `${uid}_${todayDateStr()}`;
-    try {
-      const snap = await getDoc(doc(db, "uploadCounters", counterId));
-      return snap.exists() ? (snap.data().count || 0) : 0;
-    } catch (e) {
-      console.warn("アップロード件数の取得に失敗しました:", e);
-      return 0;
-    }
-  }
- 
-  async function refreshUploadQuotaText() {
-    if (!currentAuthUser) return;
-    const count = await getTodayUploadCount(currentAuthUser.uid);
-    const remaining = Math.max(0, DAILY_UPLOAD_LIMIT - count);
-    document.getElementById("uploadQuotaText").textContent =
-      `本日のアップロード可能枚数: 残り${remaining}枚（1日${DAILY_UPLOAD_LIMIT}枚まで）`;
-  }
- 
-  // カウンターをトランザクションでインクリメント。上限到達時はfalseを返す。
-  async function tryConsumeUploadQuota(uid) {
-    const dateStr = todayDateStr();
-    const counterId = `${uid}_${dateStr}`;
-    const counterRef = doc(db, "uploadCounters", counterId);
-    let allowed = true;
-    await runTransaction(db, async (tx) => {
-      const snap = await tx.get(counterRef);
-      if (!snap.exists()) {
-        tx.set(counterRef, { uid: uid, date: dateStr, count: 1 });
-      } else {
-        const current = snap.data().count || 0;
-        if (current >= DAILY_UPLOAD_LIMIT) {
-          allowed = false;
-          return;
-        }
-        tx.update(counterRef, { count: current + 1 });
-      }
-    });
-    return allowed;
-  }
- 
   document.getElementById("uploadBtnAuthorized").onclick = async () => {
     const uploadBtn = document.getElementById("uploadBtnAuthorized");
     const file = document.getElementById("fileInput").files[0];
@@ -1107,13 +1049,7 @@
  
     uploadBtn.disabled = true;
     showSpinner();
-    try {
-      // ★ 追加（懸念点2）：ストレージにアップロードする前に、まず1日の上限をチェック・消費する
-      const quotaOk = await tryConsumeUploadQuota(auth.currentUser.uid);
-      if (!quotaOk) {
-        alert(`本日のアップロード上限（${DAILY_UPLOAD_LIMIT}枚）に達しました。日付が変わってから再度お試しください。`);
-        return;
-      }
+  
  
       const compressedBlob = await compressImage(file, 0.7);
       const ext = compressedBlob.type === "image/png" ? "png" : "jpg";
@@ -1142,7 +1078,6 @@
       document.getElementById("fileInput").value = "";
       document.getElementById("tagInput").value = "";
       renderGallery();
-      refreshUploadQuotaText();
     } catch (error) { alert("アップロード失敗: " + error.message); }
     finally { hideSpinner(); uploadBtn.disabled = false; }
   };
