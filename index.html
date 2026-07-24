@@ -4,78 +4,79 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>まちフォト</title>
-  
+ 
   <meta property="og:title" content="まちフォト | 地域の魅力をシェアしよう">
   <meta property="og:description" content="商用利用可能なフリー写真素材をみんなで共有するプラットフォームです。あなたの街の風景をシェアしませんか？">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://kakeruy121320-cmd.github.io/"> 
+  <meta property="og:url" content="https://kakeruy121320-cmd.github.io/">
   <meta name="twitter:card" content="summary_large_image">
-
+ 
   <style>
-    /* 全体デザイン・カラー設定 */
     :root {
       --main-blue: #2196f3;
-      --グレー: #757575; 
-      --ピンク: #e91e63; 
-      --オレンジ: #ff9800; 
+      --グレー: #757575;
+      --ピンク: #e91e63;
+      --オレンジ: #ff9800;
       --背景: #f8f8f8;
       --コンポーネント背景: white;
-      
+ 
       --hover-scale: 1.05;
       --hover-shadow: 0 4px 15px rgba(0,0,0,0.2);
       --transition-speed: 0.2s;
     }
     body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: var(--背景); margin: 0; text-align: center; }
     header { background: var(--main-blue); color: white; padding: 20px 0; font-size: 1.6em; letter-spacing: 2px; }
-    
+ 
     .main-content { padding: 20px; }
-    
+ 
     .unauthorized-box { background: var(--コンポーネント背景); padding: 30px; margin: 20px auto; max-width: 500px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     .unauthorized-box p { margin-bottom: 20px; color: #555; }
-    
+ 
     .link-btn { background: none; border: none; color: var(--グレー); font-size: 0.9em; cursor: pointer; text-decoration: underline; padding: 10px; transition: color var(--transition-speed), transform var(--transition-speed); }
     .link-btn:hover { color: #333; transform: scale(var(--hover-scale)); }
-
-    /* ★ 右上のボタン配置調整 */
+ 
     .header-buttons { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 100; }
     .action-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-size: 1em; transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed); }
     .action-btn:hover { transform: scale(var(--hover-scale)); box-shadow: var(--hover-shadow); }
-    
+ 
     .pink-btn { background: var(--ピンク); color: white; }
     .blue-btn { background: var(--main-blue); color: white; }
     .orange-btn { background: var(--オレンジ); color: white; }
     .gray-btn { background: var(--グレー); color: white; }
-    
+    .danger-btn { background: #b71c1c; color: white; }
+ 
     .action-box { background: var(--コンポーネント背景); padding: 20px; margin: 20px auto; max-width: 500px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: left; }
     .action-box h3 { margin-top: 0; color: #333; }
     .action-box input[type="file"] { margin-bottom: 10px; width: calc(100% - 20px); }
     .action-box input[type="text"] { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
-
+    .upload-quota-text { font-size: 0.8em; color: #888; margin: -5px 0 10px; }
+ 
     .controls-area { margin: 20px auto; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 600px; }
     #searchBox { padding: 10px 20px; width: 60%; min-width: 200px; border: 2px solid var(--main-blue); border-radius: 25px; font-size: 1em; outline: none; transition: border-color var(--transition-speed); }
     #searchBox:focus { border-color: var(--ピンク); }
     #sortSelect { padding: 10px 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 1em; outline: none; background: white; cursor: pointer; }
-
+ 
+    .bounded-mode-note { max-width: 600px; margin: 0 auto 10px; font-size: 0.75em; color: #999; }
+ 
     .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
     .tile-item { position: relative; width: 220px; background: var(--コンポーネント背景); border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s ease; will-change: transform; overflow: hidden; cursor: pointer; text-align: left; }
     .tile-item:hover { transform: scale(1.03) translateZ(0); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
-    
+ 
     .user-profile { padding: 10px 10px 5px; display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; }
     .user-icon { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #eee; }
     .user-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
-
+ 
     .tile-item img.thumb { width: 100%; height: 150px; object-fit: cover; }
-    
+ 
     .tile-item .info { padding: 5px 10px 10px; display: flex; justify-content: space-between; align-items: center; }
     .tile-item .tag { background: var(--ピンク); color: white; display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
-
+ 
     .like-area { display: flex; align-items: center; gap: 4px; font-size: 0.9em; font-weight: bold; }
     .like-icon { cursor: pointer; font-size: 1.2em; transition: transform 0.2s; }
     .like-icon:hover { transform: scale(1.2); }
     .like-icon.active { color: var(--ピンク); }
     .like-icon.inactive { color: #ccc; }
-
-    /* ★ 修正：ホバー依存をやめ、メニュー切替ボタン方式に変更 */
+ 
     .menu-toggle-btn {
       position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
       border-radius: 50%; background: rgba(0,0,0,0.5); color: white;
@@ -84,54 +85,52 @@
       transition: background-color var(--transition-speed), transform var(--transition-speed);
     }
     .menu-toggle-btn:hover { background: rgba(0,0,0,0.7); transform: scale(1.1); }
-
+ 
     .tile-item-actions { position: absolute; top: 40px; right: 8px; display: none; flex-direction: column; gap: 5px; z-index: 10; }
     .tile-item-actions.show { display: flex; }
     .tile-item-actions button { padding: 5px 10px; border: none; border-radius: 5px; color: white; font-size: 0.7em; cursor: pointer; transition: transform var(--transition-speed); }
     .tile-item-actions button:hover { transform: scale(1.1); }
     .edit-btn { background: #4caf50; }
     .delete-btn { background: #ff5252; }
-    
+ 
+    .report-btn-wrap { padding: 0 10px 10px; }
+    .report-btn { width: 100%; padding: 6px; border: none; border-radius: 5px; color: white; font-size: 0.75em; cursor: pointer; background: #607d8b; transition: transform var(--transition-speed); }
+    .report-btn:hover { transform: scale(1.02); }
+ 
     .simplified-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
-    .simplified-modal-content { background: var(--コンポーネント背景); padding: 30px; border-radius: 15px; text-align: left; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .simplified-modal-content { background: var(--コンポーネント背景); padding: 30px; border-radius: 15px; text-align: left; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 85vh; overflow-y: auto; box-sizing: border-box; }
     .simplified-modal h2 { margin-top: 0; color: #333; font-size: 1.4em; border-bottom: 2px solid var(--main-blue); padding-bottom: 10px; margin-bottom: 20px; }
     .simplified-modal .content { color: #555; line-height: 1.6; margin-bottom: 20px; }
-    .simplified-modal .action-area { display: flex; justify-content: flex-end; gap: 10px; }
-
+    .simplified-modal .action-area { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+ 
     #termsModalContent { background: var(--グレー); color: white; }
     #termsModalContent h2 { border-color: white; color: white; }
     #termsModalContent .content { color: white; }
     #editModalContent input { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px; }
-    
+ 
     #detailModalContent { text-align: center; }
     #detailModalContent img { max-width: 90%; max-height: 80%; border-radius: 8px; margin-bottom: 20px; }
     #detailModalContent .tag { background: var(--ピンク); color: white; display: inline-block; padding: 8px 15px; border-radius: 20px; font-size: 1em; }
     #detailModalContent .save-btn { background: var(--オレンジ); color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 1em; margin-top: 20px; }
-
+ 
     .spinner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 9999; }
     .spinner { width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.3); border-top: 5px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
     .spinner-text { color: white; font-weight: bold; letter-spacing: 2px; font-size: 1.1em; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    /* =========================================
-       ★ スマホ向けレスポンシブデザイン
-       ========================================= */
+ 
     @media (max-width: 600px) {
       .header-buttons { top: 10px; right: 10px; gap: 5px; }
       .header-buttons button { padding: 6px 10px; font-size: 0.75em; }
-      
+ 
       .action-box, .controls-area { width: 90%; padding: 15px; flex-direction: column; }
       #searchBox, #sortSelect { width: 100%; box-sizing: border-box; }
-      
+ 
       .gallery { padding: 10px; gap: 10px; }
-      .tile-item { width: 46%; min-width: 140px; } 
-      
+      .tile-item { width: 46%; min-width: 140px; }
+ 
       .simplified-modal-content { width: 90%; padding: 20px; }
     }
-
-    /* =========================================
-       ★ スケルトンスクリーン（読み込み中の骨組み）
-       ========================================= */
+ 
     .skeleton {
       background: #e0e0e0;
       background-image: linear-gradient(90deg, #e0e0e0 0px, #f5f5f5 40px, #e0e0e0 80px);
@@ -146,15 +145,54 @@
     @media (max-width: 600px) { .img-wrapper { height: 120px; } }
     .img-wrapper img.thumb { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
     .img-wrapper img.thumb.loaded { opacity: 1; }
-    /* ★ 追加：画像読み込み失敗時の表示 */
     .img-wrapper.load-error { display: flex; align-items: center; justify-content: center; background: #eee; animation: none; }
     .img-wrapper.load-error::after { content: "画像を読み込めません"; color: #999; font-size: 0.8em; }
+ 
+    /* ★ 追加：通報・フィードバック関連 */
+    .feedback-fab {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--main-blue);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 12px 20px;
+      font-size: 0.9em;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      cursor: pointer;
+      z-index: 500;
+      transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    }
+    .feedback-fab:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+    @media (max-width: 600px) {
+      .feedback-fab { padding: 10px 16px; font-size: 0.8em; bottom: 15px; right: 15px; }
+    }
+    .report-reason-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+    .report-reason-list label { display: flex; align-items: center; gap: 8px; font-size: 0.95em; color: #333; cursor: pointer; }
+    #feedbackModalContent select,
+    #feedbackModalContent textarea,
+    #reportModalContent textarea {
+      width: calc(100% - 20px);
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      font-family: inherit;
+      font-size: 0.95em;
+      box-sizing: border-box;
+    }
+    #feedbackModalContent textarea, #reportModalContent textarea { resize: vertical; min-height: 90px; }
+ 
+    .danger-zone { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc; }
+    .danger-zone p { font-size: 0.8em; color: #b71c1c; margin-bottom: 10px; }
   </style>
 </head>
 <body>
-
+ 
 <header>まちフォト</header>
-
+ 
 <div class="main-content">
   <div id="unauthorizedMain">
     <div class="unauthorized-box" id="loginBoxContent">
@@ -165,21 +203,22 @@
       <button id="signInBtnUnauthorized" class="action-btn pink-btn">Googleでログイン</button>
     </div>
   </div>
-  
+ 
   <div id="authorizedMain" style="display:none;">
     <div class="header-buttons">
       <button id="profileSettingsBtn" class="action-btn gray-btn" style="font-size: 0.85em; padding: 8px 15px;">プロフィール設定</button>
       <button id="signOutBtnAuthorized" class="link-btn" style="color: #fff; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 8px 15px;">ログアウト</button>
     </div>
-    
+ 
     <div id="uploadArea" class="action-box">
       <h3>新しい写真をアップロード</h3>
       <input type="file" id="fileInput" accept="image/*">
-      <input type="text" id="tagInput" placeholder="タグ" maxlength="30">
+      <input type="text" id="tagInput" placeholder="タグ（例：札幌）" maxlength="30">
+      <p class="upload-quota-text" id="uploadQuotaText">本日のアップロード可能枚数を確認中...</p>
       <button id="uploadBtnAuthorized" class="action-btn blue-btn">アップロード</button>
     </div>
   </div>
-  
+ 
   <div class="controls-area">
     <input type="text" id="searchBox" placeholder="タグで検索...">
     <select id="sortSelect">
@@ -187,22 +226,30 @@
       <option value="popular">高評価順</option>
     </select>
   </div>
-
+  <p class="bounded-mode-note" id="boundedModeNote" style="display:none;">
+    ※検索中・高評価順の表示は、直近の投稿から最大300件を対象に表示しています。
+  </p>
+ 
   <div class="gallery"></div>
 </div>
-
+ 
 <div id="profileModal" class="simplified-modal">
   <div id="profileModalContent" class="simplified-modal-content">
     <h2>プロフィール設定</h2>
     <div class="content">
       <p style="font-size: 0.9em;">他のユーザーに公開されるニックネームとアイコンを設定します。<br>※Googleアカウントの本名やアイコンは公開されません。</p>
       <label style="display:block; margin-bottom:5px; font-weight:bold;">ニックネーム</label>
-      <input type="text" id="profileNicknameInput" placeholder="例：カメラマン太郎" style="width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
-      
+      <input type="text" id="profileNicknameInput" placeholder="例：カメラマン太郎" maxlength="20" style="width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
+ 
       <label style="display:block; margin-bottom:5px; font-weight:bold;">アイコン画像 (任意)</label>
       <input type="file" id="profileIconInput" accept="image/*" style="margin-bottom: 10px;">
       <div style="margin-top:10px;">
         <img id="currentProfileIconPreview" src="" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:none; border: 2px solid #ddd;">
+      </div>
+ 
+      <div class="danger-zone">
+        <p>⚠️ アカウントを削除すると、あなたが投稿した写真も含めすべてのデータが完全に削除され、元に戻せません。</p>
+        <button id="deleteAccountBtn" class="action-btn danger-btn">アカウントを削除する</button>
       </div>
     </div>
     <div class="action-area">
@@ -211,12 +258,12 @@
     </div>
   </div>
 </div>
-
+ 
 <div id="termsModal" class="simplified-modal">
   <div id="termsModalContent" class="simplified-modal-content">
     <div id="termsBox">
     <h2>利用規約およびプライバシーポリシー</h2>
-    
+ 
     <div style="max-height:50vh; overflow-y:auto; border:1px solid #eee; padding:15px; font-size: 0.85em; line-height: 1.7; background: #fafafa; color: #333; text-align: left;">
       <h3 style="border-left: 4px solid #2196f3; padding-left: 8px; margin-top: 0;">【第1部：利用規約】</h3>
       <p>この利用規約（以下「本規約」）は、「まちフォト」（以下「本サービス」）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。</p>
@@ -229,7 +276,7 @@
       <h3 style="border-left: 4px solid #4caf50; padding-left: 8px;">【第2部：プライバシーポリシー】</h3>
       <p><strong>1. 収集する個人情報</strong><br>本サービスはGoogleアカウントの内部識別子（UID）を取得しますが、本名やGoogleアイコンは公開されません。</p>
       <p><strong>2. 利用目的</strong><br>本サービスの提供・運営、お問い合わせ対応のために利用します。</p>
-      <p><strong>3. お問い合わせ窓口</strong><br>メールアドレス：[tochi.gk@gmail.com]</p>
+      <p><strong>3. お問い合わせ窓口</strong><br>画面右下の「ご意見・不具合報告」ボタンからご連絡ください。</p>
     </div>
     <div style="margin-top:20px; text-align:center;">
       <button id="agreeBtn" style="padding:12px 30px; background:#2196f3; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; transition: 0.2s;">同意して利用を開始する</button>
@@ -238,7 +285,7 @@
    </div>
   </div>
 </div>
-
+ 
 <div id="detailModal" class="simplified-modal">
   <div id="detailModalContent" class="simplified-modal-content">
     <h2>画像詳細</h2>
@@ -252,7 +299,7 @@
     </div>
   </div>
 </div>
-
+ 
 <div id="deleteModal" class="simplified-modal">
   <div id="deleteModalContent" class="simplified-modal-content">
     <h2>削除の確認</h2>
@@ -266,13 +313,13 @@
     </div>
   </div>
 </div>
-
+ 
 <div id="editModal" class="simplified-modal">
   <div id="editModalContent" class="simplified-modal-content">
     <h2>タグの編集</h2>
     <div class="content">
       <p>この写真のタグを変更しますか？</p>
-      <input type="text" id="editTagInput" placeholder="新しいタグ">
+      <input type="text" id="editTagInput" placeholder="新しいタグ" maxlength="30">
     </div>
     <div class="action-area">
       <button id="cancelEditBtn" class="action-btn gray-btn">キャンセル</button>
@@ -280,20 +327,70 @@
     </div>
   </div>
 </div>
-
+ 
+<!-- ★ 追加：通報モーダル -->
+<div id="reportModal" class="simplified-modal">
+  <div id="reportModalContent" class="simplified-modal-content">
+    <h2>この写真を通報する</h2>
+    <div class="content">
+      <p>該当する理由を選択してください。</p>
+      <div class="report-reason-list">
+        <label><input type="radio" name="reportReason" value="著作権・肖像権の侵害"> 著作権・肖像権の侵害</label>
+        <label><input type="radio" name="reportReason" value="個人情報が写り込んでいる"> 個人情報が写り込んでいる</label>
+        <label><input type="radio" name="reportReason" value="わいせつ・暴力的な内容"> わいせつ・暴力的な内容</label>
+        <label><input type="radio" name="reportReason" value="スパム・無関係な画像"> スパム・無関係な画像</label>
+        <label><input type="radio" name="reportReason" value="その他"> その他</label>
+      </div>
+      <textarea id="reportDetailInput" placeholder="詳細（任意）" maxlength="500"></textarea>
+    </div>
+    <div class="action-area">
+      <button id="cancelReportBtn" class="action-btn gray-btn">キャンセル</button>
+      <button id="submitReportBtn" class="action-btn orange-btn">通報する</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- ★ 追加：フィードバック（不具合・要望）モーダル -->
+<div id="feedbackModal" class="simplified-modal">
+  <div id="feedbackModalContent" class="simplified-modal-content">
+    <h2>ご意見・不具合報告</h2>
+    <div class="content">
+      <label style="display:block; margin-bottom:5px; font-weight:bold;">種類</label>
+      <select id="feedbackTypeSelect">
+        <option value="不具合報告">不具合報告</option>
+        <option value="機能要望">機能要望</option>
+        <option value="その他">その他のご意見</option>
+      </select>
+      <label style="display:block; margin-bottom:5px; font-weight:bold;">内容</label>
+      <textarea id="feedbackDetailInput" placeholder="不具合の状況や、あったらいいなと思う機能などをお書きください" maxlength="2000"></textarea>
+      <p style="font-size:0.8em; color:#888;">※返信をご希望の場合はご自身の連絡先を本文にご記入ください。</p>
+    </div>
+    <div class="action-area">
+      <button id="cancelFeedbackBtn" class="action-btn gray-btn">キャンセル</button>
+      <button id="submitFeedbackBtn" class="action-btn blue-btn">送信する</button>
+    </div>
+  </div>
+</div>
+ 
+<button id="openFeedbackBtn" class="feedback-fab">💬 ご意見・不具合報告</button>
+ 
 <div id="loadingSpinner" class="spinner-overlay">
   <div class="spinner"></div>
   <div class="spinner-text">処理中...</div>
 </div>
-
+ 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  
-  // ★ 修正：一番安定しているポップアップ方式（signInWithPopup）に戻しました
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
+  import {
+    getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy,
+    updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where, limit, startAfter,
+    runTransaction
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import {
+    getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, deleteUser
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+ 
   const firebaseConfig = {
     apiKey: "AIzaSyA905mJ-r1OxzV5n-f7fAC3D0keVV-GwGM",
     authDomain: "machi-photo.firebaseapp.com",
@@ -302,26 +399,39 @@
     messagingSenderId: "625685667366",
     appId: "1:625685667366:web:3de33df7fe5bc75ccdd0e7"
   };
-
+ 
   const app = initializeApp(firebaseConfig);
   const storage = getStorage(app);
   const db = getFirestore(app);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
-
+ 
   let agreedToTerms = false;
-  let images = [];
   let currentAuthUser = null;
-  
+ 
   let currentUserProfile = {
     nickname: "匿名ユーザー",
     iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"
   };
-
-  let displayCount = 12; 
-  const LOAD_STEP = 12;  
-
-  // ★ 追加：ユーザー入力をHTMLに埋め込む前にエスケープするための関数（保存型XSS対策）
+ 
+  // ★ 追加：1日のアップロード上限
+  const DAILY_UPLOAD_LIMIT = 20;
+ 
+  // ================================================================
+  // ★ 修正（懸念点1）：写真の取得方法をページネーション方式に変更
+  // ・「新着順」で検索フィルタなし ＝ paginatedモード：Firestoreに都度limit()で取得
+  // ・「高評価順」または検索中 ＝ boundedモード：最大300件までを対象に取得（コスト上限を設ける）
+  // ================================================================
+  const PAGE_SIZE = 12;
+  const BOUNDED_FETCH_LIMIT = 300;
+ 
+  let images = [];          // 現在メモリ上に読み込まれている写真データ
+  let displayCount = 12;    // bounded/検索モードでの表示件数（クライアント側の絞り込み用）
+  let lastVisibleDoc = null;
+  let noMoreDocs = false;
+  let currentMode = "paginated"; // "paginated" | "bounded"
+  let isFetching = false;
+ 
   function escapeHtml(str) {
     if (typeof str !== 'string') {
       return str;
@@ -338,22 +448,21 @@
       return escapeMap[match];
     });
   }
-
+ 
   function showSpinner() { document.getElementById("loadingSpinner").style.display = "flex"; }
   function hideSpinner() { document.getElementById("loadingSpinner").style.display = "none"; }
   function showModal(modal) { modal.style.display = "flex"; }
   function hideModal(modal) { modal.style.display = "none"; }
-
-  // ★ 追加：LINEやTwitterなどの「アプリ内ブラウザ」を判定する機能
+ 
   function isInAppBrowser() {
     const ua = navigator.userAgent || navigator.vendor || window.opera;
-    return (ua.indexOf("Instagram") > -1) || 
-           (ua.indexOf("FBAN") > -1) || 
-           (ua.indexOf("FBAV") > -1) || 
-           (ua.indexOf("Twitter") > -1) || 
+    return (ua.indexOf("Instagram") > -1) ||
+           (ua.indexOf("FBAN") > -1) ||
+           (ua.indexOf("FBAV") > -1) ||
+           (ua.indexOf("Twitter") > -1) ||
            (ua.indexOf("Line") > -1);
   }
-
+ 
   async function loadUserProfile(uid) {
     try {
       const userSnap = await getDoc(doc(db, "users", uid));
@@ -366,19 +475,19 @@
       }
     } catch(e) { console.error("プロフィールの読み込みに失敗しました:", e); }
   }
-
+ 
   function showMainContent() {
     document.getElementById("unauthorizedMain").style.display = "none";
     document.getElementById("authorizedMain").style.display = "block";
-    loadPhotos();
+    refreshUploadQuotaText();
+    loadInitialPhotos();
   }
-
+ 
   function showUnauthorizedMainContent() {
     document.getElementById("unauthorizedMain").style.display = "block";
     document.getElementById("authorizedMain").style.display = "none";
     currentAuthUser = null;
-
-    // ★ 追加：アプリ内ブラウザで開かれた場合は、警告メッセージにすり替える
+ 
     if (isInAppBrowser()) {
       document.getElementById("unauthorizedMain").innerHTML = `
         <div class="unauthorized-box" style="border: 2px solid var(--ピンク);">
@@ -392,40 +501,39 @@
         </div>
       `;
     }
-    loadPhotos();
+    loadInitialPhotos();
   }
-
-  // もし警告画面になっていなければ、通常通りボタンにイベントを設定
+ 
   if (!isInAppBrowser()) {
     document.getElementById("showTermsBtnUnauthorized").onclick = () => showModal(document.getElementById("termsModal"));
     document.getElementById("closeTermsBtn").onclick = () => hideModal(document.getElementById("termsModal"));
-    
+ 
     document.getElementById("agreeBtn").onclick = () => {
       agreedToTerms = true;
       hideModal(document.getElementById("termsModal"));
       showSpinner();
-      signInWithPopup(auth, provider).catch(error => { 
-        alert("ログインに失敗しました。\n・詳細: " + error.message); 
+      signInWithPopup(auth, provider).catch(error => {
+        alert("ログインに失敗しました。\n・詳細: " + error.message);
       }).finally(() => hideSpinner());
     };
-
+ 
     document.getElementById("signInBtnUnauthorized").onclick = () => {
       if (!agreedToTerms) {
         showModal(document.getElementById("termsModal"));
       } else {
         showSpinner();
-        signInWithPopup(auth, provider).catch(error => { 
-          alert("ログインに失敗しました。\n・詳細: " + error.message); 
+        signInWithPopup(auth, provider).catch(error => {
+          alert("ログインに失敗しました。\n・詳細: " + error.message);
         }).finally(() => hideSpinner());
       }
     };
   }
-
+ 
   document.getElementById("signOutBtnAuthorized").onclick = () => {
     showSpinner();
     signOut(auth).finally(() => hideSpinner());
   };
-
+ 
   onAuthStateChanged(auth, async user => {
     if (user) {
       currentAuthUser = user;
@@ -435,64 +543,16 @@
       showUnauthorizedMainContent();
     }
   });
-
-  // ★ 修正：EXIF回転補正・PNG透過対応・解像度縮小に対応した圧縮関数
-function compressImage(file, quality = 0.7, maxSize = 1920) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // createImageBitmapはEXIFのOrientationを自動で正しく解釈してくれる
-      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
-
-      let { width, height } = bitmap;
-
-      // 長辺がmaxSizeを超える場合は縮小する
-      if (width > maxSize || height > maxSize) {
-        if (width > height) {
-          height = Math.round(height * (maxSize / width));
-          width = maxSize;
-        } else {
-          width = Math.round(width * (maxSize / height));
-          height = maxSize;
-        }
-      }
-
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(bitmap, 0, 0, width, height);
-      bitmap.close();
-
-      // PNG（透過）はPNGのまま、それ以外はJPEGに圧縮する
-      const isPng = file.type === "image/png";
-      const outputType = isPng ? "image/png" : "image/jpeg";
-      const outputQuality = isPng ? undefined : quality; // PNGはqualityパラメータ無効
-
-      canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("画像の圧縮に失敗しました"));
-      }, outputType, outputQuality);
-
-    } catch (err) {
-      // createImageBitmapが使えない古いブラウザ向けフォールバック
-      console.warn("createImageBitmapに失敗、FileReader方式にフォールバックします:", err);
-      compressImageFallback(file, quality, maxSize).then(resolve).catch(reject);
-    }
-  });
-}
-
-// ★ フォールバック：古いSafari等、createImageBitmapのimageOrientation未対応環境向け
-function compressImageFallback(file, quality, maxSize) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("ファイルの読み込みに失敗しました"));
-    reader.onload = (e) => { img.src = e.target.result; };
-    img.onerror = () => reject(new Error("画像の読み込みに失敗しました（壊れた画像か非対応の形式の可能性があります）"));
-    img.onload = () => {
+ 
+  // ================================================================
+  // ★ 修正（懸念点3・4・5）：EXIF回転補正・PNG透過維持・解像度縮小に対応
+  // ================================================================
+  function compressImage(file, quality = 0.7, maxSize = 1920) {
+    return new Promise(async (resolve, reject) => {
       try {
-        let width = img.width;
-        let height = img.height;
+        const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+        let { width, height } = bitmap;
+ 
         if (width > maxSize || height > maxSize) {
           if (width > height) {
             height = Math.round(height * (maxSize / width));
@@ -502,56 +562,147 @@ function compressImageFallback(file, quality, maxSize) {
             height = maxSize;
           }
         }
+ 
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
+        ctx.drawImage(bitmap, 0, 0, width, height);
+        bitmap.close();
+ 
         const isPng = file.type === "image/png";
         const outputType = isPng ? "image/png" : "image/jpeg";
         const outputQuality = isPng ? undefined : quality;
-
+ 
         canvas.toBlob((blob) => {
           if (blob) resolve(blob);
           else reject(new Error("画像の圧縮に失敗しました"));
         }, outputType, outputQuality);
+ 
       } catch (err) {
-        reject(err);
+        console.warn("createImageBitmapに失敗、フォールバック方式を使用します:", err);
+        compressImageFallback(file, quality, maxSize).then(resolve).catch(reject);
       }
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-  async function loadPhotos(keepCount = false) {
+    });
+  }
+ 
+  function compressImageFallback(file, quality, maxSize) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("ファイルの読み込みに失敗しました"));
+      reader.onload = (e) => { img.src = e.target.result; };
+      img.onerror = () => reject(new Error("画像の読み込みに失敗しました（壊れた画像か非対応の形式の可能性があります）"));
+      img.onload = () => {
+        try {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxSize || height > maxSize) {
+            if (width > height) {
+              height = Math.round(height * (maxSize / width));
+              width = maxSize;
+            } else {
+              width = Math.round(width * (maxSize / height));
+              height = maxSize;
+            }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+ 
+          const isPng = file.type === "image/png";
+          const outputType = isPng ? "image/png" : "image/jpeg";
+          const outputQuality = isPng ? undefined : quality;
+ 
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("画像の圧縮に失敗しました"));
+          }, outputType, outputQuality);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+ 
+  // ================================================================
+  // ★ 修正（懸念点1）：初期読み込み・追加読み込みのロジック
+  // ================================================================
+  function getCurrentMode() {
+    const filter = document.getElementById("searchBox").value.trim();
+    const sortMode = document.getElementById("sortSelect").value;
+    return (filter === "" && sortMode === "newest") ? "paginated" : "bounded";
+  }
+ 
+  async function loadInitialPhotos() {
+    if (isFetching) return;
+    isFetching = true;
     showSpinner();
     images = [];
+    lastVisibleDoc = null;
+    noMoreDocs = false;
+    displayCount = PAGE_SIZE;
+    currentMode = getCurrentMode();
+    document.getElementById("boundedModeNote").style.display = (currentMode === "bounded") ? "block" : "none";
+ 
     try {
-      const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(docSnap => {
-        images.push({ ...docSnap.data(), docId: docSnap.id });
-      });
-      renderGallery(!keepCount); 
+      if (currentMode === "paginated") {
+        const q = query(collection(db, "photos"), orderBy("createdAt", "desc"), limit(PAGE_SIZE));
+        const snap = await getDocs(q);
+        snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
+        lastVisibleDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+        if (snap.docs.length < PAGE_SIZE) noMoreDocs = true;
+      } else {
+        const q = query(collection(db, "photos"), orderBy("createdAt", "desc"), limit(BOUNDED_FETCH_LIMIT));
+        const snap = await getDocs(q);
+        snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
+        noMoreDocs = true; // bounded分はこれで全て
+      }
+      renderGallery();
     } catch (e) {
       document.querySelector(".gallery").innerHTML = "<p>写真の取得に失敗しました。</p>";
+      console.error(e);
     } finally {
       hideSpinner();
+      isFetching = false;
     }
   }
-
-  function renderGallery(resetCount = true) {
-    if (resetCount) { displayCount = LOAD_STEP; }
-
+ 
+  async function loadMorePhotosIfNeeded() {
+    if (isFetching || noMoreDocs) return;
+ 
+    if (currentMode === "paginated") {
+      isFetching = true;
+      try {
+        const q = query(collection(db, "photos"), orderBy("createdAt", "desc"), startAfter(lastVisibleDoc), limit(PAGE_SIZE));
+        const snap = await getDocs(q);
+        snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
+        lastVisibleDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : lastVisibleDoc;
+        if (snap.docs.length < PAGE_SIZE) noMoreDocs = true;
+        renderGallery();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        isFetching = false;
+      }
+    } else {
+      // boundedモードでは既に取得済みのimagesの中から表示件数を増やすだけ
+      displayCount += PAGE_SIZE;
+      renderGallery();
+    }
+  }
+ 
+  function renderGallery() {
     const filter = document.getElementById("searchBox").value;
     const sortMode = document.getElementById("sortSelect").value;
     const gallery = document.querySelector(".gallery");
     gallery.innerHTML = "";
-    
-    // ★ 修正：tagフィールドが存在しないデータでも落ちないようにガードを追加
+ 
     let filtered = images.filter(img => (img.tag || "").includes(filter));
-
+ 
     if (sortMode === "popular") {
       filtered.sort((a, b) => {
         const likesA = a.likes ? a.likes.length : 0;
@@ -559,49 +710,47 @@ function compressImageFallback(file, quality, maxSize) {
         return likesB - likesA;
       });
     } else {
-      // ★ 修正：createdAtが無い／不正なデータでも落ちないようにガードを追加
       filtered.sort((a, b) => {
         const tb = b.createdAt && typeof b.createdAt.toMillis === "function" ? b.createdAt.toMillis() : 0;
         const ta = a.createdAt && typeof a.createdAt.toMillis === "function" ? a.createdAt.toMillis() : 0;
         return tb - ta;
       });
     }
-
+ 
     if (filtered.length === 0) {
       gallery.innerHTML = "<p>写真がありません。</p>";
       return;
     }
-
-    const itemsToShow = filtered.slice(0, displayCount);
+ 
+    const itemsToShow = currentMode === "paginated" ? filtered : filtered.slice(0, displayCount);
     const fragment = document.createDocumentFragment();
-
+ 
     itemsToShow.forEach(img => {
       const item = document.createElement("div");
       item.className = "tile-item";
-      
+ 
       const isOwner = currentAuthUser && currentAuthUser.uid === img.userId;
       const likesCount = img.likes ? img.likes.length : 0;
       const hasLiked = currentAuthUser && img.likes && img.likes.includes(currentAuthUser.uid);
       const heartClass = hasLiked ? "active" : "inactive";
-
-      // ★ 修正：ユーザー入力由来の値はすべてエスケープしてから埋め込む（保存型XSS対策）
+ 
       const userName = escapeHtml(img.userName || "匿名ユーザー");
       const userIcon = escapeHtml(img.userIcon || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>");
       const tagText = escapeHtml(img.tag || "タグなし");
       const fileUrl = escapeHtml(img.file || "");
-
+ 
       item.innerHTML = `
         <div class="user-profile">
           <img src="${userIcon}" alt="icon" class="user-icon" loading="lazy">
           <span class="user-name">${userName}</span>
         </div>
-        
+ 
         <div class="img-wrapper skeleton">
-          <img src="${fileUrl}" alt="${tagText}" class="thumb" loading="lazy" 
+          <img src="${fileUrl}" alt="${tagText}" class="thumb" loading="lazy"
                onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');"
                onerror="this.parentElement.classList.remove('skeleton'); this.parentElement.classList.add('load-error'); this.style.display='none';">
         </div>
-        
+ 
         <div class="info">
           <span class="tag">#${tagText}</span>
           <div class="like-area">
@@ -609,6 +758,7 @@ function compressImageFallback(file, quality, maxSize) {
             <span class="like-count" style="color: #555;">${likesCount}</span>
           </div>
         </div>
+        ${!isOwner ? `<div class="report-btn-wrap"><button class="report-btn">🚩 通報</button></div>` : ""}
         ${isOwner ? `
           <button class="menu-toggle-btn" type="button" aria-label="メニュー">⋮</button>
           <div class="tile-item-actions">
@@ -617,45 +767,60 @@ function compressImageFallback(file, quality, maxSize) {
           </div>
         ` : ""}
       `;
-
-      // ★ 注：モーダル側は img.file / img.tag の生値をJSプロパティとして渡すだけなので
-      // （innerHTMLへの直接埋め込みではないため）ここはエスケープ不要
+ 
       item.querySelector(".thumb").onclick = () => {
         const modal = document.getElementById("detailModal");
         document.getElementById("detailModalImg").src = img.file;
         document.getElementById("detailModalTag").textContent = `#${img.tag || "タグなし"}`;
         showModal(modal);
       };
-
+ 
       item.querySelector(".like-icon").onclick = async (e) => {
         e.stopPropagation();
         if (!currentAuthUser) return alert("いいねするにはログインが必要です。");
         const docId = e.target.dataset.id;
         const photoRef = doc(db, "photos", docId);
-        document.getElementById("loadingSpinner").style.display = "flex";
+        showSpinner();
         try {
+          const target = images.find(i => i.docId === docId);
           if (hasLiked) {
             await updateDoc(photoRef, { likes: arrayRemove(currentAuthUser.uid) });
+            if (target) target.likes = (target.likes || []).filter(u => u !== currentAuthUser.uid);
           } else {
             await updateDoc(photoRef, { likes: arrayUnion(currentAuthUser.uid) });
+            if (target) target.likes = [...(target.likes || []), currentAuthUser.uid];
           }
-          await loadPhotos(true);
-        } catch (error) { console.error(error); } 
-        finally { document.getElementById("loadingSpinner").style.display = "none"; }
+          // ★ 修正（懸念点1）：いいね操作のたびに全件再取得しない。ローカルデータのみ更新して再描画。
+          renderGallery();
+        } catch (error) { console.error(error); }
+        finally { hideSpinner(); }
       };
-
-      // ★ 修正：ホバーではなく「︙」ボタンのタップでメニュー開閉する方式に変更
+ 
+      const reportBtn = item.querySelector(".report-btn");
+      if (reportBtn) {
+        reportBtn.onclick = (e) => {
+          e.stopPropagation();
+          if (!currentAuthUser) return alert("通報するにはログインが必要です。");
+          document.querySelectorAll('input[name="reportReason"]').forEach(r => r.checked = false);
+          document.getElementById("reportDetailInput").value = "";
+          const modal = document.getElementById("reportModal");
+          modal.dataset.photoDocId = img.docId;
+          modal.dataset.photoFileUrl = img.file || "";
+          showModal(modal);
+        };
+      }
+ 
       if (isOwner) {
         const menuBtn = item.querySelector(".menu-toggle-btn");
         const actionsBox = item.querySelector(".tile-item-actions");
-
+ 
         menuBtn.onclick = (e) => {
           e.stopPropagation();
           const isOpen = actionsBox.classList.contains("show");
           document.querySelectorAll(".tile-item-actions.show").forEach(el => el.classList.remove("show"));
           if (!isOpen) actionsBox.classList.add("show");
         };
-
+ 
         item.querySelector(".edit-btn").onclick = (e) => {
           e.stopPropagation();
           actionsBox.classList.remove("show");
@@ -664,7 +829,7 @@ function compressImageFallback(file, quality, maxSize) {
           showModal(modal);
           modal.dataset.docId = img.docId;
         };
-
+ 
         item.querySelector(".delete-btn").onclick = (e) => {
           e.stopPropagation();
           actionsBox.classList.remove("show");
@@ -678,32 +843,26 @@ function compressImageFallback(file, quality, maxSize) {
     });
     gallery.appendChild(fragment);
   }
-
-  // ★ 追加：メニュー外をタップしたら開いているメニューを閉じる
+ 
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".tile-item-actions") && !e.target.closest(".menu-toggle-btn")) {
       document.querySelectorAll(".tile-item-actions.show").forEach(el => el.classList.remove("show"));
     }
   });
-
-  document.getElementById("searchBox").addEventListener("input", () => renderGallery(true));
-  document.getElementById("sortSelect").addEventListener("change", () => renderGallery(true));
-
+ 
+  document.getElementById("searchBox").addEventListener("input", () => loadInitialPhotos());
+  document.getElementById("sortSelect").addEventListener("change", () => loadInitialPhotos());
+ 
   window.addEventListener("scroll", () => {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-      const filter = document.getElementById("searchBox").value;
-      const filtered = images.filter(img => (img.tag || "").includes(filter));
-      if (displayCount < filtered.length) {
-        displayCount += LOAD_STEP; 
-        renderGallery(false); 
-      }
+      loadMorePhotosIfNeeded();
     }
   });
-
+ 
   document.getElementById("profileSettingsBtn").onclick = () => {
     document.getElementById("profileNicknameInput").value = currentUserProfile.nickname || "";
     const preview = document.getElementById("currentProfileIconPreview");
-    if(currentUserProfile.iconUrl && !currentUserProfile.iconUrl.includes("<svg")) {
+    if (currentUserProfile.iconUrl && !currentUserProfile.iconUrl.includes("<svg")) {
       preview.src = currentUserProfile.iconUrl;
       preview.style.display = "block";
     } else {
@@ -711,32 +870,32 @@ function compressImageFallback(file, quality, maxSize) {
     }
     showModal(document.getElementById("profileModal"));
   };
-
+ 
   document.getElementById("cancelProfileBtn").onclick = () => hideModal(document.getElementById("profileModal"));
-
-  // ★ 修正：保存ボタンの多重クリック防止のため、処理中は無効化する
+ 
   document.getElementById("saveProfileBtn").onclick = async () => {
     const saveBtn = document.getElementById("saveProfileBtn");
     const newNickname = document.getElementById("profileNicknameInput").value.trim();
     if (!newNickname) return alert("ニックネームを入力してください");
     const file = document.getElementById("profileIconInput").files[0];
-    
+ 
     saveBtn.disabled = true;
     showSpinner();
     try {
       let newIconUrl = currentUserProfile.iconUrl;
       if (file) {
         const compressedBlob = await compressImage(file, 0.4);
-        const fileName = `${auth.currentUser.uid}_icon_${Date.now()}`;
+        const ext = compressedBlob.type === "image/png" ? "png" : "jpg";
+        const fileName = `${auth.currentUser.uid}_icon_${Date.now()}.${ext}`;
         const iconRef = ref(storage, `uploads/${fileName}`);
         const snapshot = await uploadBytes(iconRef, compressedBlob);
         newIconUrl = await getDownloadURL(snapshot.ref);
       }
-      
+ 
       const newProfile = { nickname: newNickname, iconUrl: newIconUrl };
       await setDoc(doc(db, "users", auth.currentUser.uid), newProfile, { merge: true });
       currentUserProfile = newProfile;
-      
+ 
       const myPhotosQ = query(collection(db, "photos"), where("userId", "==", auth.currentUser.uid));
       const myPhotosSnap = await getDocs(myPhotosQ);
       const updatePromises = [];
@@ -745,13 +904,16 @@ function compressImageFallback(file, quality, maxSize) {
           userName: newNickname,
           userIcon: newIconUrl
         }));
+        // ローカルのimages配列にも反映
+        const target = images.find(i => i.docId === docSnap.id);
+        if (target) { target.userName = newNickname; target.userIcon = newIconUrl; }
       });
       await Promise.all(updatePromises);
-      
+ 
       alert("プロフィールを更新しました！");
       hideModal(document.getElementById("profileModal"));
       document.getElementById("profileIconInput").value = "";
-      await loadPhotos(true); 
+      renderGallery();
     } catch(e) {
       alert("保存に失敗しました。\n詳細: " + e.message);
       console.error(e);
@@ -760,7 +922,52 @@ function compressImageFallback(file, quality, maxSize) {
       saveBtn.disabled = false;
     }
   };
-
+ 
+  // ================================================================
+  // ★ 追加（懸念点5）：アカウント削除
+  // ================================================================
+  document.getElementById("deleteAccountBtn").onclick = async () => {
+    const confirmed = confirm(
+      "本当にアカウントを削除しますか？\n\nあなたが投稿した写真もすべて完全に削除され、この操作は取り消せません。"
+    );
+    if (!confirmed) return;
+ 
+    showSpinner();
+    try {
+      const uid = auth.currentUser.uid;
+ 
+      const myPhotosQ = query(collection(db, "photos"), where("userId", "==", uid));
+      const myPhotosSnap = await getDocs(myPhotosQ);
+      for (const docSnap of myPhotosSnap.docs) {
+        const data = docSnap.data();
+        if (data.file) {
+          try { await deleteObject(ref(storage, data.file)); }
+          catch (e) { console.warn("画像削除に失敗しました（既に存在しない可能性）:", e); }
+        }
+        await deleteDoc(docSnap.ref);
+      }
+ 
+      await deleteDoc(doc(db, "users", uid));
+      await deleteUser(auth.currentUser);
+ 
+      alert("アカウントを削除しました。ご利用ありがとうございました。");
+    } catch (e) {
+      if (e.code === "auth/requires-recent-login") {
+        alert("セキュリティのため、再度ログインが必要です。ログイン画面を表示します。");
+        try {
+          await signInWithPopup(auth, provider);
+          alert("再ログインしました。もう一度「アカウントを削除する」ボタンを押してください。");
+        } catch (e2) {
+          alert("再ログインに失敗しました。時間をおいて再度お試しください。");
+        }
+      } else {
+        alert("削除処理に失敗しました。\n" + e.message);
+      }
+    } finally {
+      hideSpinner();
+    }
+  };
+ 
   document.getElementById("cancelEditBtn").onclick = () => hideModal(document.getElementById("editModal"));
   document.getElementById("saveEditBtn").onclick = async () => {
     const saveBtn = document.getElementById("saveEditBtn");
@@ -772,13 +979,15 @@ function compressImageFallback(file, quality, maxSize) {
     showSpinner();
     try {
       await updateDoc(doc(db, "photos", docId), { tag: newTag });
+      const target = images.find(i => i.docId === docId);
+      if (target) target.tag = newTag;
       hideModal(modal);
       alert("タグを変更しました！");
-      await loadPhotos(true); 
-    } catch(e) { alert("編集に失敗しました。"); } 
+      renderGallery();
+    } catch(e) { alert("編集に失敗しました。"); }
     finally { hideSpinner(); saveBtn.disabled = false; }
   };
-
+ 
   document.getElementById("cancelDeleteBtn").onclick = () => hideModal(document.getElementById("deleteModal"));
   document.getElementById("confirmDeleteBtn").onclick = async () => {
     const confirmBtn = document.getElementById("confirmDeleteBtn");
@@ -794,24 +1003,24 @@ function compressImageFallback(file, quality, maxSize) {
           const fileRef = ref(storage, fileUrl);
           await deleteObject(fileRef);
         } catch (e) {
-          // ★ 修正：失敗を握りつぶさずログに残す（Firestoreのドキュメント削除は続行する）
           console.warn("ストレージ上の画像削除に失敗しました（ファイルが既に存在しない可能性があります）:", e);
         }
       }
       await deleteDoc(doc(db, "photos", docId));
+      images = images.filter(i => i.docId !== docId);
       hideModal(modal);
       alert("画像を削除しました。");
-      await loadPhotos(true); 
-    } catch (error) { alert("削除に失敗しました: " + error.message); } 
+      renderGallery();
+    } catch (error) { alert("削除に失敗しました: " + error.message); }
     finally { hideSpinner(); confirmBtn.disabled = false; }
   };
-
+ 
   document.getElementById("downloadBtnDetailModal").onclick = async (e) => {
     e.stopPropagation();
     if (!currentAuthUser) return alert("ダウンロードするにはログインが必要です");
     downloadImage();
   };
-  
+ 
   async function downloadImage() {
     showSpinner();
     try {
@@ -827,51 +1036,190 @@ function compressImageFallback(file, quality, maxSize) {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(blobUrl);
-    } catch (err) { alert("保存に失敗しました。"); } 
+    } catch (err) { alert("保存に失敗しました。"); }
     finally { hideSpinner(); }
   }
-
+ 
   document.getElementById("closeDetailBtn").onclick = () => hideModal(document.getElementById("detailModal"));
-
-  // ★ 修正：アップロードボタンの多重クリック防止のため、処理中は無効化する
+ 
+  // ================================================================
+  // ★ 追加（懸念点2）：1日のアップロード上限のチェック・表示
+  // ================================================================
+  function todayDateStr() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+ 
+  async function getTodayUploadCount(uid) {
+    const counterId = `${uid}_${todayDateStr()}`;
+    try {
+      const snap = await getDoc(doc(db, "uploadCounters", counterId));
+      return snap.exists() ? (snap.data().count || 0) : 0;
+    } catch (e) {
+      console.warn("アップロード件数の取得に失敗しました:", e);
+      return 0;
+    }
+  }
+ 
+  async function refreshUploadQuotaText() {
+    if (!currentAuthUser) return;
+    const count = await getTodayUploadCount(currentAuthUser.uid);
+    const remaining = Math.max(0, DAILY_UPLOAD_LIMIT - count);
+    document.getElementById("uploadQuotaText").textContent =
+      `本日のアップロード可能枚数: 残り${remaining}枚（1日${DAILY_UPLOAD_LIMIT}枚まで）`;
+  }
+ 
+  // カウンターをトランザクションでインクリメント。上限到達時はfalseを返す。
+  async function tryConsumeUploadQuota(uid) {
+    const dateStr = todayDateStr();
+    const counterId = `${uid}_${dateStr}`;
+    const counterRef = doc(db, "uploadCounters", counterId);
+    let allowed = true;
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(counterRef);
+      if (!snap.exists()) {
+        tx.set(counterRef, { uid: uid, date: dateStr, count: 1 });
+      } else {
+        const current = snap.data().count || 0;
+        if (current >= DAILY_UPLOAD_LIMIT) {
+          allowed = false;
+          return;
+        }
+        tx.update(counterRef, { count: current + 1 });
+      }
+    });
+    return allowed;
+  }
+ 
   document.getElementById("uploadBtnAuthorized").onclick = async () => {
     const uploadBtn = document.getElementById("uploadBtnAuthorized");
     const file = document.getElementById("fileInput").files[0];
     const tag = document.getElementById("tagInput").value.trim();
     if (!file || !tag) return alert("ファイルとタグを入力してください");
-
+ 
     const confirmUpload = confirm(
       "【重要：アップロード前の確認】\n\n投稿する写真は「商用利用可能なフリー素材」として他のユーザーに公開されます。\n\n・ご自身で撮影・作成した画像ですか？\n・他人の権利（著作権、肖像権など）を侵害していませんか？\n\n上記を確認し、同意してアップロードしますか？"
     );
-    if (!confirmUpload) return; 
-
+    if (!confirmUpload) return;
+ 
     uploadBtn.disabled = true;
     showSpinner();
     try {
+      // ★ 追加（懸念点2）：ストレージにアップロードする前に、まず1日の上限をチェック・消費する
+      const quotaOk = await tryConsumeUploadQuota(auth.currentUser.uid);
+      if (!quotaOk) {
+        alert(`本日のアップロード上限（${DAILY_UPLOAD_LIMIT}枚）に達しました。日付が変わってから再度お試しください。`);
+        return;
+      }
+ 
       const compressedBlob = await compressImage(file, 0.7);
-const ext = compressedBlob.type === "image/png" ? "png" : "jpg";
-const fileName = `${auth.currentUser.uid}_${Date.now()}.${ext}`;
+      const ext = compressedBlob.type === "image/png" ? "png" : "jpg";
+      const fileName = `${auth.currentUser.uid}_${Date.now()}.${ext}`;
       const storageRef = ref(storage, `uploads/${fileName}`);
       const snapshot = await uploadBytes(storageRef, compressedBlob);
       const url = await getDownloadURL(snapshot.ref);
-
-      await addDoc(collection(db, "photos"), {
+ 
+      const newDocData = {
         file: url,
         tag: tag,
         userId: auth.currentUser.uid,
         userName: currentUserProfile.nickname,
         userIcon: currentUserProfile.iconUrl,
         createdAt: new Date(),
-        likes: [] 
-      });
-
+        likes: []
+      };
+      const newDocRef = await addDoc(collection(db, "photos"), newDocData);
+ 
+      // ★ 修正（懸念点1）：アップロード後に全件再取得せず、ローカルへ先頭追加するだけにする
+      if (currentMode === "paginated") {
+        images.unshift({ ...newDocData, docId: newDocRef.id });
+      }
+ 
       alert("アップロード成功！");
       document.getElementById("fileInput").value = "";
       document.getElementById("tagInput").value = "";
-      await loadPhotos(); 
-    } catch (error) { alert("アップロード失敗: " + error.message); } 
+      renderGallery();
+      refreshUploadQuotaText();
+    } catch (error) { alert("アップロード失敗: " + error.message); }
     finally { hideSpinner(); uploadBtn.disabled = false; }
+  };
+ 
+  // ================================================================
+  // ★ 追加（懸念点3）：通報モーダルの制御
+  // ================================================================
+  document.getElementById("cancelReportBtn").onclick = () => hideModal(document.getElementById("reportModal"));
+ 
+  document.getElementById("submitReportBtn").onclick = async () => {
+    const submitBtn = document.getElementById("submitReportBtn");
+    const modal = document.getElementById("reportModal");
+    const selectedReason = document.querySelector('input[name="reportReason"]:checked');
+    if (!selectedReason) return alert("通報理由を選択してください。");
+ 
+    const detail = document.getElementById("reportDetailInput").value.trim();
+    const photoDocId = modal.dataset.photoDocId;
+    const photoFileUrl = modal.dataset.photoFileUrl;
+ 
+    submitBtn.disabled = true;
+    showSpinner();
+    try {
+      await addDoc(collection(db, "reports"), {
+        photoDocId: photoDocId,
+        photoFileUrl: photoFileUrl,
+        reason: selectedReason.value,
+        detail: detail,
+        reporterUid: auth.currentUser.uid,
+        createdAt: new Date(),
+        status: "open"
+      });
+      alert("通報を受け付けました。ご協力ありがとうございます。");
+      hideModal(modal);
+    } catch (e) {
+      alert("通報の送信に失敗しました。\n" + e.message);
+    } finally {
+      hideSpinner();
+      submitBtn.disabled = false;
+    }
+  };
+ 
+  // ★ 追加：フィードバック（不具合・要望）モーダルの制御
+  document.getElementById("openFeedbackBtn").onclick = () => {
+    document.getElementById("feedbackTypeSelect").value = "不具合報告";
+    document.getElementById("feedbackDetailInput").value = "";
+    showModal(document.getElementById("feedbackModal"));
+  };
+ 
+  document.getElementById("cancelFeedbackBtn").onclick = () => hideModal(document.getElementById("feedbackModal"));
+ 
+  document.getElementById("submitFeedbackBtn").onclick = async () => {
+    const submitBtn = document.getElementById("submitFeedbackBtn");
+    const type = document.getElementById("feedbackTypeSelect").value;
+    const detail = document.getElementById("feedbackDetailInput").value.trim();
+    if (!detail) return alert("内容を入力してください。");
+ 
+    submitBtn.disabled = true;
+    showSpinner();
+    try {
+      await addDoc(collection(db, "feedback"), {
+        type: type,
+        detail: detail,
+        reporterUid: currentAuthUser ? currentAuthUser.uid : null,
+        userAgent: navigator.userAgent,
+        createdAt: new Date(),
+        status: "open"
+      });
+      alert("送信しました。ご協力ありがとうございます！");
+      hideModal(document.getElementById("feedbackModal"));
+    } catch (e) {
+      alert("送信に失敗しました。\n" + e.message);
+    } finally {
+      hideSpinner();
+      submitBtn.disabled = false;
+    }
   };
 </script>
 </body>
 </html>
+ 
