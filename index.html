@@ -12,6 +12,7 @@
   <meta name="twitter:card" content="summary_large_image">
  
   <style>
+    /* CSSは変更がないためそのまま */
     :root {
       --main-blue: #2196f3;
       --グレー: #757575;
@@ -19,184 +20,112 @@
       --オレンジ: #ff9800;
       --背景: #f8f8f8;
       --コンポーネント背景: white;
- 
       --hover-scale: 1.05;
       --hover-shadow: 0 4px 15px rgba(0,0,0,0.2);
       --transition-speed: 0.2s;
     }
     body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: var(--背景); margin: 0; text-align: center; }
     header { background: var(--main-blue); color: white; padding: 20px 0; font-size: 1.6em; letter-spacing: 2px; }
- 
     .main-content { padding: 20px; }
- 
     .unauthorized-box { background: var(--コンポーネント背景); padding: 30px; margin: 20px auto; max-width: 500px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     .unauthorized-box p { margin-bottom: 20px; color: #555; }
- 
     .link-btn { background: none; border: none; color: var(--グレー); font-size: 0.9em; cursor: pointer; text-decoration: underline; padding: 10px; transition: color var(--transition-speed), transform var(--transition-speed); }
     .link-btn:hover { color: #333; transform: scale(var(--hover-scale)); }
- 
     .header-buttons { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 100; }
     .action-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-size: 1em; transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed); }
     .action-btn:hover { transform: scale(var(--hover-scale)); box-shadow: var(--hover-shadow); }
- 
     .pink-btn { background: var(--ピンク); color: white; }
     .blue-btn { background: var(--main-blue); color: white; }
     .orange-btn { background: var(--オレンジ); color: white; }
     .gray-btn { background: var(--グレー); color: white; }
     .danger-btn { background: #b71c1c; color: white; }
- 
     .action-box { background: var(--コンポーネント背景); padding: 20px; margin: 20px auto; max-width: 500px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: left; }
     .action-box h3 { margin-top: 0; color: #333; }
     .action-box input[type="file"] { margin-bottom: 10px; width: calc(100% - 20px); }
     .action-box input[type="text"] { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
-    .upload-quota-text { font-size: 0.8em; color: #888; margin: -5px 0 10px; }
- 
     .controls-area { margin: 20px auto; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 600px; }
     #searchBox { padding: 10px 20px; width: 60%; min-width: 200px; border: 2px solid var(--main-blue); border-radius: 25px; font-size: 1em; outline: none; transition: border-color var(--transition-speed); }
     #searchBox:focus { border-color: var(--ピンク); }
     #sortSelect { padding: 10px 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 1em; outline: none; background: white; cursor: pointer; }
- 
     .bounded-mode-note { max-width: 600px; margin: 0 auto 10px; font-size: 0.75em; color: #999; }
- 
     .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
     .tile-item { position: relative; width: 220px; background: var(--コンポーネント背景); border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s ease; will-change: transform; overflow: hidden; cursor: pointer; text-align: left; }
     .tile-item:hover { transform: scale(1.03) translateZ(0); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
- 
     .user-profile { padding: 10px 10px 5px; display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; }
     .user-icon { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #eee; }
     .user-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
- 
     .tile-item img.thumb { width: 100%; height: 150px; object-fit: cover; }
- 
     .tile-item .info { padding: 5px 10px 10px; display: flex; justify-content: space-between; align-items: center; }
     .tile-item .tag { background: var(--ピンク); color: white; display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
- 
     .like-area { display: flex; align-items: center; gap: 4px; font-size: 0.9em; font-weight: bold; }
     .like-icon { cursor: pointer; font-size: 1.2em; transition: transform 0.2s; }
     .like-icon:hover { transform: scale(1.2); }
     .like-icon.active { color: var(--ピンク); }
     .like-icon.inactive { color: #ccc; }
- 
-    .menu-toggle-btn {
-      position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
-      border-radius: 50%; background: rgba(0,0,0,0.5); color: white;
-      border: none; font-size: 1.1em; line-height: 1; cursor: pointer;
-      z-index: 11; display: flex; align-items: center; justify-content: center;
-      transition: background-color var(--transition-speed), transform var(--transition-speed);
-    }
+    .menu-toggle-btn { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.5); color: white; border: none; font-size: 1.1em; line-height: 1; cursor: pointer; z-index: 11; display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-speed), transform var(--transition-speed); }
     .menu-toggle-btn:hover { background: rgba(0,0,0,0.7); transform: scale(1.1); }
- 
     .tile-item-actions { position: absolute; top: 40px; right: 8px; display: none; flex-direction: column; gap: 5px; z-index: 10; }
     .tile-item-actions.show { display: flex; }
     .tile-item-actions button { padding: 5px 10px; border: none; border-radius: 5px; color: white; font-size: 0.7em; cursor: pointer; transition: transform var(--transition-speed); }
     .tile-item-actions button:hover { transform: scale(1.1); }
     .edit-btn { background: #4caf50; }
     .delete-btn { background: #ff5252; }
- 
     .report-btn-wrap { padding: 0 10px 10px; }
     .report-btn { width: 100%; padding: 6px; border: none; border-radius: 5px; color: white; font-size: 0.75em; cursor: pointer; background: #607d8b; transition: transform var(--transition-speed); }
     .report-btn:hover { transform: scale(1.02); }
- 
     .simplified-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
     .simplified-modal-content { background: var(--コンポーネント背景); padding: 30px; border-radius: 15px; text-align: left; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 85vh; overflow-y: auto; box-sizing: border-box; }
     .simplified-modal h2 { margin-top: 0; color: #333; font-size: 1.4em; border-bottom: 2px solid var(--main-blue); padding-bottom: 10px; margin-bottom: 20px; }
     .simplified-modal .content { color: #555; line-height: 1.6; margin-bottom: 20px; }
     .simplified-modal .action-area { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
- 
     #termsModalContent { background: var(--グレー); color: white; }
     #termsModalContent h2 { border-color: white; color: white; }
     #termsModalContent .content { color: white; }
     #editModalContent input { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px; }
- 
     #detailModalContent { text-align: center; }
     #detailModalContent img { max-width: 90%; max-height: 80%; border-radius: 8px; margin-bottom: 20px; }
     #detailModalContent .tag { background: var(--ピンク); color: white; display: inline-block; padding: 8px 15px; border-radius: 20px; font-size: 1em; }
     #detailModalContent .save-btn { background: var(--オレンジ); color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 1em; margin-top: 20px; }
- 
     .spinner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 9999; }
     .spinner { width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.3); border-top: 5px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
     .spinner-text { color: white; font-weight: bold; letter-spacing: 2px; font-size: 1.1em; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
- 
     @media (max-width: 600px) {
       .header-buttons { top: 10px; right: 10px; gap: 5px; }
       .header-buttons button { padding: 6px 10px; font-size: 0.75em; }
- 
       .action-box, .controls-area { width: 90%; padding: 15px; flex-direction: column; }
       #searchBox, #sortSelect { width: 100%; box-sizing: border-box; }
- 
       .gallery { padding: 10px; gap: 10px; }
       .tile-item { width: 46%; min-width: 140px; }
- 
       .simplified-modal-content { width: 90%; padding: 20px; }
     }
- 
-    .skeleton {
-      background: #e0e0e0;
-      background-image: linear-gradient(90deg, #e0e0e0 0px, #f5f5f5 40px, #e0e0e0 80px);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite linear;
-    }
-    @keyframes shimmer {
-      0% { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
-    }
+    .skeleton { background: #e0e0e0; background-image: linear-gradient(90deg, #e0e0e0 0px, #f5f5f5 40px, #e0e0e0 80px); background-size: 200% 100%; animation: shimmer 1.5s infinite linear; }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
     .img-wrapper { position: relative; width: 100%; height: 150px; background-color: #f0f0f0; }
     @media (max-width: 600px) { .img-wrapper { height: 120px; } }
     .img-wrapper img.thumb { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
     .img-wrapper img.thumb.loaded { opacity: 1; }
     .img-wrapper.load-error { display: flex; align-items: center; justify-content: center; background: #eee; animation: none; }
     .img-wrapper.load-error::after { content: "画像を読み込めません"; color: #999; font-size: 0.8em; }
- 
-    /* ★ 追加：通報・フィードバック関連 */
-    .feedback-fab {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--main-blue);
-      color: white;
-      border: none;
-      border-radius: 30px;
-      padding: 12px 20px;
-      font-size: 0.9em;
-      font-weight: bold;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      cursor: pointer;
-      z-index: 500;
-      transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-    }
+    .feedback-fab { position: fixed; bottom: 20px; right: 20px; background: var(--main-blue); color: white; border: none; border-radius: 30px; padding: 12px 20px; font-size: 0.9em; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 500; transition: transform var(--transition-speed), box-shadow var(--transition-speed); }
     .feedback-fab:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
-    @media (max-width: 600px) {
-      .feedback-fab { padding: 10px 16px; font-size: 0.8em; bottom: 15px; right: 15px; }
-    }
+    @media (max-width: 600px) { .feedback-fab { padding: 10px 16px; font-size: 0.8em; bottom: 15px; right: 15px; } }
     .report-reason-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
     .report-reason-list label { display: flex; align-items: center; gap: 8px; font-size: 0.95em; color: #333; cursor: pointer; }
-    #feedbackModalContent select,
-    #feedbackModalContent textarea,
-    #reportModalContent textarea {
-      width: calc(100% - 20px);
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      margin-bottom: 15px;
-      font-family: inherit;
-      font-size: 0.95em;
-      box-sizing: border-box;
-    }
+    #feedbackModalContent select, #feedbackModalContent textarea, #reportModalContent textarea { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px; font-family: inherit; font-size: 0.95em; box-sizing: border-box; }
     #feedbackModalContent textarea, #reportModalContent textarea { resize: vertical; min-height: 90px; }
- 
     .danger-zone { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc; }
     .danger-zone p { font-size: 0.8em; color: #b71c1c; margin-bottom: 10px; }
   </style>
 </head>
 <body>
  
-<header>まちフォト</header>
+<header>街フォト</header>
  
 <div class="main-content">
   <div id="unauthorizedMain">
     <div class="unauthorized-box" id="loginBoxContent">
-      <p>「まちフォト」へようこそ！<br>
+      <p>「街フォト」へようこそ！<br>
       写真を投稿するにはログインが必要です。<br>
       利用規約をご確認の上、ログインしてください。</p>
       <button id="showTermsBtnUnauthorized" class="link-btn">利用規約を見る</button>
@@ -263,9 +192,9 @@
     <div id="termsBox">
     <h2>利用規約およびプライバシーポリシー</h2>
  
-       <div style="max-height:50vh; overflow-y:auto; border:1px solid #eee; padding:15px; font-size: 0.85em; line-height: 1.7; background: #fafafa; color: #333; text-align: left;">
+    <div style="max-height:50vh; overflow-y:auto; border:1px solid #eee; padding:15px; font-size: 0.85em; line-height: 1.7; background: #fafafa; color: #333; text-align: left;">
       <h3 style="border-left: 4px solid #2196f3; padding-left: 8px; margin-top: 0;">【第1部：利用規約】</h3>
-      <p>この利用規約（以下「本規約」）は、「まちフォト」（以下「本サービス」）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。</p>
+      <p>この利用規約（以下「本規約」）は、「街フォト」（以下「本サービス」）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。</p>
       
       <p><strong>第1条（適用・同意）</strong><br>1. 本規約は、ユーザーと本サービスの運営者との間の、本サービスの利用に関わる一切の関係に適用されます。<br>2. ユーザーは、本サービスを利用した時点で、本規約に同意したものとみなされます。</p>
       
@@ -292,7 +221,6 @@
 
       <p><strong>4. お問い合わせ窓口</strong><br>画面右下の「ご意見・不具合報告」ボタンからご連絡ください。</p>
     </div>
-
     <div style="margin-top:20px; text-align:center;">
       <button id="agreeBtn" style="padding:12px 30px; background:#2196f3; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; transition: 0.2s;">同意して利用を開始する</button>
       <button id="closeTermsBtn" style="padding:12px 20px; margin-left:10px; border:none; border-radius:5px; cursor:pointer; background:#ccc; transition: 0.2s;">同意しない</button>
@@ -343,7 +271,6 @@
   </div>
 </div>
  
-<!-- ★ 追加：通報モーダル -->
 <div id="reportModal" class="simplified-modal">
   <div id="reportModalContent" class="simplified-modal-content">
     <h2>この写真を通報する</h2>
@@ -365,7 +292,6 @@
   </div>
 </div>
  
-<!-- ★ 追加：フィードバック（不具合・要望）モーダル -->
 <div id="feedbackModal" class="simplified-modal">
   <div id="feedbackModalContent" class="simplified-modal-content">
     <h2>ご意見・不具合報告</h2>
@@ -399,7 +325,8 @@
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
   import {
     getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy,
-    updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where, limit, startAfter
+    updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where, limit, startAfter,
+    writeBatch
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import {
     getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, deleteUser
@@ -428,19 +355,14 @@
     iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"
   };
  
-  // ================================================================
-  // ★ 修正（懸念点1）：写真の取得方法をページネーション方式に変更
-  // ・「新着順」で検索フィルタなし ＝ paginatedモード：Firestoreに都度limit()で取得
-  // ・「高評価順」または検索中 ＝ boundedモード：最大300件までを対象に取得（コスト上限を設ける）
-  // ================================================================
   const PAGE_SIZE = 12;
   const BOUNDED_FETCH_LIMIT = 300;
  
-  let images = [];          // 現在メモリ上に読み込まれている写真データ
-  let displayCount = 12;    // bounded/検索モードでの表示件数（クライアント側の絞り込み用）
+  let images = [];         
+  let displayCount = 12;   
   let lastVisibleDoc = null;
   let noMoreDocs = false;
-  let currentMode = "paginated"; // "paginated" | "bounded"
+  let currentMode = "paginated"; 
   let isFetching = false;
  
   function escapeHtml(str) {
@@ -554,15 +476,11 @@
     }
   });
  
-  // ================================================================
-  // ★ 修正（懸念点3・4・5）：EXIF回転補正・PNG透過維持・解像度縮小に対応
-  // ================================================================
   function compressImage(file, quality = 0.7, maxSize = 1920) {
     return new Promise(async (resolve, reject) => {
       try {
         const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
         let { width, height } = bitmap;
- 
         if (width > maxSize || height > maxSize) {
           if (width > height) {
             height = Math.round(height * (maxSize / width));
@@ -572,23 +490,19 @@
             height = maxSize;
           }
         }
- 
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(bitmap, 0, 0, width, height);
         bitmap.close();
- 
         const isPng = file.type === "image/png";
         const outputType = isPng ? "image/png" : "image/jpeg";
         const outputQuality = isPng ? undefined : quality;
- 
         canvas.toBlob((blob) => {
           if (blob) resolve(blob);
           else reject(new Error("画像の圧縮に失敗しました"));
         }, outputType, outputQuality);
- 
       } catch (err) {
         console.warn("createImageBitmapに失敗、フォールバック方式を使用します:", err);
         compressImageFallback(file, quality, maxSize).then(resolve).catch(reject);
@@ -621,11 +535,9 @@
           canvas.height = height;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
- 
           const isPng = file.type === "image/png";
           const outputType = isPng ? "image/png" : "image/jpeg";
           const outputQuality = isPng ? undefined : quality;
- 
           canvas.toBlob((blob) => {
             if (blob) resolve(blob);
             else reject(new Error("画像の圧縮に失敗しました"));
@@ -638,9 +550,6 @@
     });
   }
  
-  // ================================================================
-  // ★ 修正（懸念点1）：初期読み込み・追加読み込みのロジック
-  // ================================================================
   function getCurrentMode() {
     const filter = document.getElementById("searchBox").value.trim();
     const sortMode = document.getElementById("sortSelect").value;
@@ -669,7 +578,7 @@
         const q = query(collection(db, "photos"), orderBy("createdAt", "desc"), limit(BOUNDED_FETCH_LIMIT));
         const snap = await getDocs(q);
         snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
-        noMoreDocs = true; // bounded分はこれで全て
+        noMoreDocs = true; 
       }
       renderGallery();
     } catch (e) {
@@ -683,7 +592,6 @@
  
   async function loadMorePhotosIfNeeded() {
     if (isFetching || noMoreDocs) return;
- 
     if (currentMode === "paginated") {
       isFetching = true;
       try {
@@ -699,7 +607,6 @@
         isFetching = false;
       }
     } else {
-      // boundedモードでは既に取得済みのimagesの中から表示件数を増やすだけ
       displayCount += PAGE_SIZE;
       renderGallery();
     }
@@ -710,7 +617,6 @@
     const sortMode = document.getElementById("sortSelect").value;
     const gallery = document.querySelector(".gallery");
     gallery.innerHTML = "";
- 
     let filtered = images.filter(img => (img.tag || "").includes(filter));
  
     if (sortMode === "popular") {
@@ -721,9 +627,13 @@
       });
     } else {
       filtered.sort((a, b) => {
-        const tb = b.createdAt && typeof b.createdAt.toMillis === "function" ? b.createdAt.toMillis() : 0;
-        const ta = a.createdAt && typeof a.createdAt.toMillis === "function" ? a.createdAt.toMillis() : 0;
-        return tb - ta;
+        const getTime = (dateObj) => {
+          if (!dateObj) return 0;
+          if (typeof dateObj.toMillis === "function") return dateObj.toMillis();
+          if (dateObj instanceof Date) return dateObj.getTime();
+          return 0;
+        };
+        return getTime(b.createdAt) - getTime(a.createdAt);
       });
     }
  
@@ -738,14 +648,17 @@
     itemsToShow.forEach(img => {
       const item = document.createElement("div");
       item.className = "tile-item";
- 
       const isOwner = currentAuthUser && currentAuthUser.uid === img.userId;
       const likesCount = img.likes ? img.likes.length : 0;
       const hasLiked = currentAuthUser && img.likes && img.likes.includes(currentAuthUser.uid);
       const heartClass = hasLiked ? "active" : "inactive";
- 
       const userName = escapeHtml(img.userName || "匿名ユーザー");
-      const userIcon = escapeHtml(img.userIcon || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>");
+      
+      let userIcon = escapeHtml(img.userIcon);
+      if (!userIcon) {
+        userIcon = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+      }
+      
       const tagText = escapeHtml(img.tag || "タグなし");
       const fileUrl = escapeHtml(img.file || "");
  
@@ -754,13 +667,11 @@
           <img src="${userIcon}" alt="icon" class="user-icon" loading="lazy">
           <span class="user-name">${userName}</span>
         </div>
- 
         <div class="img-wrapper skeleton">
           <img src="${fileUrl}" alt="${tagText}" class="thumb" loading="lazy"
                onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');"
                onerror="this.parentElement.classList.remove('skeleton'); this.parentElement.classList.add('load-error'); this.style.display='none';">
         </div>
- 
         <div class="info">
           <span class="tag">#${tagText}</span>
           <div class="like-area">
@@ -800,7 +711,6 @@
             await updateDoc(photoRef, { likes: arrayUnion(currentAuthUser.uid) });
             if (target) target.likes = [...(target.likes || []), currentAuthUser.uid];
           }
-          // ★ 修正（懸念点1）：いいね操作のたびに全件再取得しない。ローカルデータのみ更新して再描画。
           renderGallery();
         } catch (error) { console.error(error); }
         finally { hideSpinner(); }
@@ -823,14 +733,12 @@
       if (isOwner) {
         const menuBtn = item.querySelector(".menu-toggle-btn");
         const actionsBox = item.querySelector(".tile-item-actions");
- 
         menuBtn.onclick = (e) => {
           e.stopPropagation();
           const isOpen = actionsBox.classList.contains("show");
           document.querySelectorAll(".tile-item-actions.show").forEach(el => el.classList.remove("show"));
           if (!isOpen) actionsBox.classList.add("show");
         };
- 
         item.querySelector(".edit-btn").onclick = (e) => {
           e.stopPropagation();
           actionsBox.classList.remove("show");
@@ -839,7 +747,6 @@
           showModal(modal);
           modal.dataset.docId = img.docId;
         };
- 
         item.querySelector(".delete-btn").onclick = (e) => {
           e.stopPropagation();
           actionsBox.classList.remove("show");
@@ -860,7 +767,7 @@
     }
   });
  
-  document.getElementById("searchBox").addEventListener("input", () => loadInitialPhotos());
+  document.getElementById("searchBox").addEventListener("change", () => loadInitialPhotos());
   document.getElementById("sortSelect").addEventListener("change", () => loadInitialPhotos());
  
   window.addEventListener("scroll", () => {
@@ -880,15 +787,13 @@
     }
     showModal(document.getElementById("profileModal"));
   };
- 
-  document.getElementById("cancelProfileBtn").onclick = () => hideModal(document.getElementById("profileModal"));
- 
-  document.getElementById("saveProfileBtn").onclick = async () => {
+ document.getElementById("cancelProfileBtn").onclick = () => hideModal(document.getElementById("profileModal"));
+ document.getElementById("saveProfileBtn").onclick = async () => {
     const saveBtn = document.getElementById("saveProfileBtn");
     const newNickname = document.getElementById("profileNicknameInput").value.trim();
     if (!newNickname) return alert("ニックネームを入力してください");
     const file = document.getElementById("profileIconInput").files[0];
- 
+
     saveBtn.disabled = true;
     showSpinner();
     try {
@@ -901,25 +806,33 @@
         const snapshot = await uploadBytes(iconRef, compressedBlob);
         newIconUrl = await getDownloadURL(snapshot.ref);
       }
- 
+
       const newProfile = { nickname: newNickname, iconUrl: newIconUrl };
       await setDoc(doc(db, "users", auth.currentUser.uid), newProfile, { merge: true });
       currentUserProfile = newProfile;
- 
+
+      // 自分の過去の投稿すべてに新しいニックネーム・アイコンを反映する。
+      // writeBatchで一括更新することで、途中失敗時のデータ不整合を防ぐ（最大500件/バッチ）。
       const myPhotosQ = query(collection(db, "photos"), where("userId", "==", auth.currentUser.uid));
       const myPhotosSnap = await getDocs(myPhotosQ);
-      const updatePromises = [];
-      myPhotosSnap.forEach(docSnap => {
-        updatePromises.push(updateDoc(docSnap.ref, {
-          userName: newNickname,
-          userIcon: newIconUrl
-        }));
-        // ローカルのimages配列にも反映
-        const target = images.find(i => i.docId === docSnap.id);
-        if (target) { target.userName = newNickname; target.userIcon = newIconUrl; }
+
+      const docs = myPhotosSnap.docs;
+      for (let i = 0; i < docs.length; i += 500) {
+        const chunk = docs.slice(i, i + 500);
+        const batch = writeBatch(db);
+        chunk.forEach(docSnap => {
+          batch.update(docSnap.ref, { userName: newNickname, userIcon: newIconUrl });
+        });
+        await batch.commit();
+      }
+
+      images.forEach(img => {
+        if (img.userId === auth.currentUser.uid) {
+          img.userName = newNickname;
+          img.userIcon = newIconUrl;
+        }
       });
-      await Promise.all(updatePromises);
- 
+
       alert("プロフィールを更新しました！");
       hideModal(document.getElementById("profileModal"));
       document.getElementById("profileIconInput").value = "";
@@ -933,19 +846,16 @@
     }
   };
  
-  // ================================================================
-  // ★ 追加（懸念点5）：アカウント削除
-  // ================================================================
   document.getElementById("deleteAccountBtn").onclick = async () => {
     const confirmed = confirm(
       "本当にアカウントを削除しますか？\n\nあなたが投稿した写真もすべて完全に削除され、この操作は取り消せません。"
     );
     if (!confirmed) return;
- 
+
     showSpinner();
     try {
       const uid = auth.currentUser.uid;
- 
+
       const myPhotosQ = query(collection(db, "photos"), where("userId", "==", uid));
       const myPhotosSnap = await getDocs(myPhotosQ);
       for (const docSnap of myPhotosSnap.docs) {
@@ -956,10 +866,10 @@
         }
         await deleteDoc(docSnap.ref);
       }
- 
+
       await deleteDoc(doc(db, "users", uid));
       await deleteUser(auth.currentUser);
- 
+
       alert("アカウントを削除しました。ご利用ありがとうございました。");
     } catch (e) {
       if (e.code === "auth/requires-recent-login") {
@@ -1013,7 +923,7 @@
           const fileRef = ref(storage, fileUrl);
           await deleteObject(fileRef);
         } catch (e) {
-          console.warn("ストレージ上の画像削除に失敗しました（ファイルが既に存在しない可能性があります）:", e);
+          console.warn("ストレージ上の画像削除に失敗しました:", e);
         }
       }
       await deleteDoc(doc(db, "photos", docId));
@@ -1058,6 +968,10 @@
     const tag = document.getElementById("tagInput").value.trim();
     if (!file || !tag) return alert("ファイルとタグを入力してください");
  
+    if (file.size > 15 * 1024 * 1024) {
+      return alert("画像サイズが大きすぎます。15MB以下の画像を選択してください。");
+    }
+ 
     const confirmUpload = confirm(
       "【重要：アップロード前の確認】\n\n投稿する写真は「商用利用可能なフリー素材」として他のユーザーに公開されます。\n\n・ご自身で撮影・作成した画像ですか？\n・他人の権利（著作権、肖像権など）を侵害していませんか？\n\n上記を確認し、同意してアップロードしますか？"
     );
@@ -1065,8 +979,8 @@
  
     uploadBtn.disabled = true;
     showSpinner();
-  
- try {
+ 
+    try {
       const compressedBlob = await compressImage(file, 0.7);
       const ext = compressedBlob.type === "image/png" ? "png" : "jpg";
       const fileName = `${auth.currentUser.uid}_${Date.now()}.${ext}`;
@@ -1074,6 +988,7 @@
       const snapshot = await uploadBytes(storageRef, compressedBlob);
       const url = await getDownloadURL(snapshot.ref);
  
+      // 新規アップロード時は指定された7つのフィールドを正確に含める（ルール準拠）
       const newDocData = {
         file: url,
         tag: tag,
@@ -1085,7 +1000,6 @@
       };
       const newDocRef = await addDoc(collection(db, "photos"), newDocData);
  
-      // ★ 修正（懸念点1）：アップロード後に全件再取得せず、ローカルへ先頭追加するだけにする
       if (currentMode === "paginated") {
         images.unshift({ ...newDocData, docId: newDocRef.id });
       }
@@ -1098,9 +1012,6 @@
     finally { hideSpinner(); uploadBtn.disabled = false; }
   };
  
-  // ================================================================
-  // ★ 追加（懸念点3）：通報モーダルの制御
-  // ================================================================
   document.getElementById("cancelReportBtn").onclick = () => hideModal(document.getElementById("reportModal"));
  
   document.getElementById("submitReportBtn").onclick = async () => {
@@ -1135,7 +1046,6 @@
     }
   };
  
-  // ★ 追加：フィードバック（不具合・要望）モーダルの制御
   document.getElementById("openFeedbackBtn").onclick = () => {
     document.getElementById("feedbackTypeSelect").value = "不具合報告";
     document.getElementById("feedbackDetailInput").value = "";
@@ -1173,4 +1083,3 @@
 </script>
 </body>
 </html>
- 
