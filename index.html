@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>街フォト</title>
  
-  <meta property="og:title" content="街フォト | 地域の魅力をシェアしよう">
-  <meta property="og:description" content="商用利用可能なフリー写真素材をみんなで共有するプラットフォームです。あなたの街の風景をシェアしませんか？">
+  <meta property="og:title" content="街フォト">
+  <meta property="og:description" content="商用利用可能なフリー写真素材をみんなで共有するプラットフォーム">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://kakeruy121320-cmd.github.io/">
   <meta name="twitter:card" content="summary_large_image">
@@ -62,6 +62,7 @@
     .like-icon:hover { transform: scale(1.2); }
     .like-icon.active { color: var(--ピンク); }
     .like-icon.inactive { color: #ccc; }
+    .download-count { display: flex; align-items: center; gap: 3px; font-size: 0.8em; color: #999; }
     .menu-toggle-btn { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.5); color: white; border: none; font-size: 1.1em; line-height: 1; cursor: pointer; z-index: 11; display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-speed), transform var(--transition-speed); }
     .menu-toggle-btn:hover { background: rgba(0,0,0,0.7); transform: scale(1.1); }
     .tile-item-actions { position: absolute; top: 40px; right: 8px; display: none; flex-direction: column; gap: 5px; z-index: 10; }
@@ -86,6 +87,7 @@
     #detailModalContent img { max-width: 90%; max-height: 80%; border-radius: 8px; margin-bottom: 20px; }
     #detailModalContent .tag { background: var(--ピンク); color: white; display: inline-block; padding: 8px 15px; border-radius: 20px; font-size: 1em; }
     #detailModalContent .save-btn { background: var(--オレンジ); color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 1em; margin-top: 20px; }
+    #detailModalDownloadCount { display: block; margin-top: 8px; font-size: 0.85em; color: #888; }
     .spinner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 9999; }
     .spinner { width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.3); border-top: 5px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
     .spinner-text { color: white; font-weight: bold; letter-spacing: 2px; font-size: 1.1em; }
@@ -236,6 +238,7 @@
       <img id="detailModalImg" src="" alt="">
       <div id="detailModalTag" class="tag">#タグ</div>
       <button id="downloadBtnDetailModal" class="action-btn save-btn">保存 ⬇</button>
+      <span id="detailModalDownloadCount">ダウンロード数: 0</span>
     </div>
     <div class="action-area">
       <button id="closeDetailBtn" class="action-btn gray-btn">閉じる</button>
@@ -326,7 +329,7 @@
   import {
     getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy,
     updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, where, limit, startAfter,
-    writeBatch
+    writeBatch, increment
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import {
     getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, deleteUser
@@ -650,6 +653,7 @@
       item.className = "tile-item";
       const isOwner = currentAuthUser && currentAuthUser.uid === img.userId;
       const likesCount = img.likes ? img.likes.length : 0;
+      const downloadsCount = img.downloads || 0;
       const hasLiked = currentAuthUser && img.likes && img.likes.includes(currentAuthUser.uid);
       const heartClass = hasLiked ? "active" : "inactive";
       const userName = escapeHtml(img.userName || "匿名ユーザー");
@@ -679,6 +683,9 @@
             <span class="like-count" style="color: #555;">${likesCount}</span>
           </div>
         </div>
+        <div class="info" style="padding-top:0;">
+          <span class="download-count">⬇ ${downloadsCount}</span>
+        </div>
         ${!isOwner ? `<div class="report-btn-wrap"><button class="report-btn">🚩 通報</button></div>` : ""}
         ${isOwner ? `
           <button class="menu-toggle-btn" type="button" aria-label="メニュー">⋮</button>
@@ -693,6 +700,8 @@
         const modal = document.getElementById("detailModal");
         document.getElementById("detailModalImg").src = img.file;
         document.getElementById("detailModalTag").textContent = `#${img.tag || "タグなし"}`;
+        document.getElementById("detailModalDownloadCount").textContent = `ダウンロード数: ${img.downloads || 0}`;
+        modal.dataset.docId = img.docId;
         showModal(modal);
       };
  
@@ -937,11 +946,12 @@
  
   document.getElementById("downloadBtnDetailModal").onclick = async (e) => {
     e.stopPropagation();
-    if (!currentAuthUser) return alert("ダウンロードするにはログインが必要です");
     downloadImage();
   };
  
   async function downloadImage() {
+    const modal = document.getElementById("detailModal");
+    const docId = modal.dataset.docId;
     showSpinner();
     try {
         const file = document.getElementById("detailModalImg").src;
@@ -956,6 +966,20 @@
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(blobUrl);
+
+        if (docId) {
+          try {
+            await updateDoc(doc(db, "photos", docId), { downloads: increment(1) });
+            const target = images.find(i => i.docId === docId);
+            if (target) {
+              target.downloads = (target.downloads || 0) + 1;
+              document.getElementById("detailModalDownloadCount").textContent = `ダウンロード数: ${target.downloads}`;
+              renderGallery();
+            }
+          } catch (countErr) {
+            console.warn("ダウンロード数の更新に失敗しました:", countErr);
+          }
+        }
     } catch (err) { alert("保存に失敗しました。"); }
     finally { hideSpinner(); }
   }
@@ -988,7 +1012,7 @@
       const snapshot = await uploadBytes(storageRef, compressedBlob);
       const url = await getDownloadURL(snapshot.ref);
  
-      // 新規アップロード時は指定された7つのフィールドを正確に含める（ルール準拠）
+      // 新規アップロード時は指定された8つのフィールドを正確に含める（ルール準拠）
       const newDocData = {
         file: url,
         tag: tag,
@@ -996,7 +1020,8 @@
         userName: currentUserProfile.nickname,
         userIcon: currentUserProfile.iconUrl,
         createdAt: new Date(),
-        likes: []
+        likes: [],
+        downloads: 0
       };
       const newDocRef = await addDoc(collection(db, "photos"), newDocData);
  
