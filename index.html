@@ -1039,32 +1039,38 @@
  
   document.getElementById("cancelReportBtn").onclick = () => hideModal(document.getElementById("reportModal"));
  
-  document.getElementById("submitReportBtn").onclick = async () => {
-    const submitBtn = document.getElementById("submitReportBtn");
-    const modal = document.getElementById("reportModal");
-    const selectedReason = document.querySelector('input[name="reportReason"]:checked');
-    if (!selectedReason) return alert("通報理由を選択してください。");
- 
-    const detail = document.getElementById("reportDetailInput").value.trim();
-    const photoDocId = modal.dataset.photoDocId;
-    const photoFileUrl = modal.dataset.photoFileUrl;
- 
+  document.getElementById("submitFeedbackBtn").onclick = async () => {
+    const submitBtn = document.getElementById("submitFeedbackBtn");
+    const type = document.getElementById("feedbackTypeSelect").value;
+    const detail = document.getElementById("feedbackDetailInput").value.trim();
+    if (!detail) return alert("内容を入力してください。");
+
     submitBtn.disabled = true;
     showSpinner();
     try {
-      await addDoc(collection(db, "reports"), {
-        photoDocId: photoDocId,
-        photoFileUrl: photoFileUrl,
-        reason: selectedReason.value,
+      // 1. 従来通り「feedback」コレクションに保存
+      await addDoc(collection(db, "feedback"), {
+        type: type,
         detail: detail,
-        reporterUid: auth.currentUser.uid,
+        reporterUid: currentAuthUser ? currentAuthUser.uid : null,
+        userAgent: navigator.userAgent,
         createdAt: new Date(),
         status: "open"
       });
-      alert("通報を受け付けました。ご協力ありがとうございます。");
-      hideModal(modal);
+
+      // 2. メール送信用に「mail」コレクションに保存 (Trigger Email拡張機能がこれを検知して送信します)
+      await addDoc(collection(db, "mail"), {
+        to: "tochi.gk@gmail.com", // ★送信先のメールアドレス
+        message: {
+          subject: `【街フォト】新しいフィードバック（${type}）`,
+          text: `「街フォト」から新しいご意見・不具合報告が届きました。\n\n【種類】\n${type}\n\n【内容】\n${detail}\n\n【送信者UID】\n${currentAuthUser ? currentAuthUser.uid : '未ログイン（匿名）'}`
+        }
+      });
+
+      alert("送信しました。ご協力ありがとうございます！");
+      hideModal(document.getElementById("feedbackModal"));
     } catch (e) {
-      alert("通報の送信に失敗しました。\n" + e.message);
+      alert("送信に失敗しました。\n" + e.message);
     } finally {
       hideSpinner();
       submitBtn.disabled = false;
