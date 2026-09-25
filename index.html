@@ -12,7 +12,6 @@
   <meta name="twitter:card" content="summary_large_image">
  
   <style>
-    /* CSSは変更がないためそのまま */
     :root {
       --main-blue: #2196f3;
       --グレー: #757575;
@@ -137,6 +136,7 @@
  
   <div id="authorizedMain" style="display:none;">
     <div class="header-buttons">
+      <button id="adminBtn" class="action-btn danger-btn" style="display:none; font-size: 0.85em; padding: 8px 15px;">管理者メニュー</button>
       <button id="profileSettingsBtn" class="action-btn gray-btn" style="font-size: 0.85em; padding: 8px 15px;">プロフィール設定</button>
       <button id="signOutBtnAuthorized" class="link-btn" style="color: #fff; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 8px 15px;">ログアウト</button>
     </div>
@@ -144,18 +144,24 @@
     <div id="uploadArea" class="action-box">
       <h3>新しい写真をアップロード</h3>
       <input type="file" id="fileInput" accept="image/*">
-      <input type="text" id="tagInput" placeholder="タグ（例：札幌）" maxlength="30">
+      <input type="text" id="tagInput" placeholder="撮影場所（例：札幌、大通公園）" maxlength="30">
       <button id="uploadBtnAuthorized" class="action-btn blue-btn">アップロード</button>
     </div>
   </div>
  
   <div class="controls-area">
-    <input type="text" id="searchBox" placeholder="タグで検索...">
+    <input type="text" id="searchBox" placeholder="撮影場所で検索...">
     <select id="sortSelect">
       <option value="newest">新着順</option>
       <option value="popular">高評価順</option>
     </select>
   </div>
+
+  <div id="userFilterNotice" style="display:none; margin: 10px auto; max-width: 600px; background: #e3f2fd; padding: 10px 15px; border-radius: 8px; color: var(--main-blue); font-weight: bold; align-items: center; justify-content: space-between;">
+    <span><span id="userFilterName">〇〇</span> さんの投稿を表示中</span>
+    <button id="clearUserFilterBtn" class="action-btn gray-btn" style="padding: 5px 15px; font-size: 0.85em; margin-left:10px;">すべて表示</button>
+  </div>
+
   <p class="bounded-mode-note" id="boundedModeNote" style="display:none;">
     ※検索中・高評価順の表示は、直近の投稿から最大300件を対象に表示しています。
   </p>
@@ -236,7 +242,7 @@
     <h2>画像詳細</h2>
     <div class="content">
       <img id="detailModalImg" src="" alt="">
-      <div id="detailModalTag" class="tag">#タグ</div>
+      <div id="detailModalTag" class="tag">#撮影場所</div>
       <button id="downloadBtnDetailModal" class="action-btn save-btn">保存 ⬇</button>
       <span id="detailModalDownloadCount">ダウンロード数: 0</span>
     </div>
@@ -262,10 +268,10 @@
  
 <div id="editModal" class="simplified-modal">
   <div id="editModalContent" class="simplified-modal-content">
-    <h2>タグの編集</h2>
+    <h2>撮影場所の編集</h2>
     <div class="content">
-      <p>この写真のタグを変更しますか？</p>
-      <input type="text" id="editTagInput" placeholder="新しいタグ" maxlength="30">
+      <p>この写真の撮影場所を変更しますか？</p>
+      <input type="text" id="editTagInput" placeholder="新しい撮影場所" maxlength="30">
     </div>
     <div class="action-area">
       <button id="cancelEditBtn" class="action-btn gray-btn">キャンセル</button>
@@ -312,6 +318,22 @@
     <div class="action-area">
       <button id="cancelFeedbackBtn" class="action-btn gray-btn">キャンセル</button>
       <button id="submitFeedbackBtn" class="action-btn blue-btn">送信する</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminModal" class="simplified-modal">
+  <div id="adminModalContent" class="simplified-modal-content" style="max-width: 600px;">
+    <h2>管理者ダッシュボード</h2>
+    <div class="content" style="max-height: 50vh; overflow-y: auto; text-align: left;">
+      <h3 style="color: var(--main-blue); border-bottom: 1px solid #ddd;">ご意見・不具合報告</h3>
+      <div id="adminFeedbackList" style="font-size: 0.85em;">読み込み中...</div>
+      
+      <h3 style="color: #ff5252; border-bottom: 1px solid #ddd; margin-top: 30px;">通報一覧</h3>
+      <div id="adminReportList" style="font-size: 0.85em;">読み込み中...</div>
+    </div>
+    <div class="action-area">
+      <button id="closeAdminBtn" class="action-btn gray-btn">閉じる</button>
     </div>
   </div>
 </div>
@@ -367,6 +389,7 @@
   let noMoreDocs = false;
   let currentMode = "paginated"; 
   let isFetching = false;
+  let filterUserId = null;
  
   function escapeHtml(str) {
     if (typeof str !== 'string') {
@@ -474,8 +497,15 @@
       currentAuthUser = user;
       await loadUserProfile(user.uid);
       showMainContent();
+      
+      if (user.email === "tochi.gk@gmail.com") {
+        document.getElementById("adminBtn").style.display = "inline-block";
+      } else {
+        document.getElementById("adminBtn").style.display = "none";
+      }
     } else {
       showUnauthorizedMainContent();
+      document.getElementById("adminBtn").style.display = "none";
     }
   });
  
@@ -622,6 +652,10 @@
     gallery.innerHTML = "";
     let filtered = images.filter(img => (img.tag || "").includes(filter));
  
+    if (filterUserId) {
+      filtered = filtered.filter(img => img.userId === filterUserId);
+    }
+
     if (sortMode === "popular") {
       filtered.sort((a, b) => {
         const likesA = a.likes ? a.likes.length : 0;
@@ -663,13 +697,13 @@
         userIcon = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
       }
       
-      const tagText = escapeHtml(img.tag || "タグなし");
+      const tagText = escapeHtml(img.tag || "場所未設定");
       const fileUrl = escapeHtml(img.file || "");
  
       item.innerHTML = `
-        <div class="user-profile">
+        <div class="user-profile" data-uid="${img.userId}" data-name="${userName}" style="cursor: pointer; transition: background 0.2s; border-radius: 8px;">
           <img src="${userIcon}" alt="icon" class="user-icon" loading="lazy">
-          <span class="user-name">${userName}</span>
+          <span class="user-name" style="text-decoration: underline;">${userName}</span>
         </div>
         <div class="img-wrapper skeleton">
           <img src="${fileUrl}" alt="${tagText}" class="thumb" loading="lazy"
@@ -696,10 +730,23 @@
         ` : ""}
       `;
  
+      item.querySelector(".user-profile").onclick = (e) => {
+        e.stopPropagation();
+        const targetUid = e.currentTarget.dataset.uid;
+        const targetName = e.currentTarget.dataset.name;
+        
+        filterUserId = targetUid;
+        document.getElementById("userFilterName").textContent = targetName;
+        document.getElementById("userFilterNotice").style.display = "flex";
+        
+        renderGallery();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
       item.querySelector(".thumb").onclick = () => {
         const modal = document.getElementById("detailModal");
         document.getElementById("detailModalImg").src = img.file;
-        document.getElementById("detailModalTag").textContent = `#${img.tag || "タグなし"}`;
+        document.getElementById("detailModalTag").textContent = `#${img.tag || "場所未設定"}`;
         document.getElementById("detailModalDownloadCount").textContent = `ダウンロード数: ${img.downloads || 0}`;
         modal.dataset.docId = img.docId;
         showModal(modal);
@@ -785,6 +832,12 @@
     }
   });
  
+  document.getElementById("clearUserFilterBtn").onclick = () => {
+    filterUserId = null;
+    document.getElementById("userFilterNotice").style.display = "none";
+    renderGallery();
+  };
+
   document.getElementById("profileSettingsBtn").onclick = () => {
     document.getElementById("profileNicknameInput").value = currentUserProfile.nickname || "";
     const preview = document.getElementById("currentProfileIconPreview");
@@ -820,8 +873,6 @@
       await setDoc(doc(db, "users", auth.currentUser.uid), newProfile, { merge: true });
       currentUserProfile = newProfile;
 
-      // 自分の過去の投稿すべてに新しいニックネーム・アイコンを反映する。
-      // writeBatchで一括更新することで、途中失敗時のデータ不整合を防ぐ（最大500件/バッチ）。
       const myPhotosQ = query(collection(db, "photos"), where("userId", "==", auth.currentUser.uid));
       const myPhotosSnap = await getDocs(myPhotosQ);
 
@@ -911,7 +962,7 @@
       const target = images.find(i => i.docId === docId);
       if (target) target.tag = newTag;
       hideModal(modal);
-      alert("タグを変更しました！");
+      alert("設定を変更しました！");
       renderGallery();
     } catch(e) { alert("編集に失敗しました。"); }
     finally { hideSpinner(); saveBtn.disabled = false; }
@@ -990,7 +1041,7 @@
     const uploadBtn = document.getElementById("uploadBtnAuthorized");
     const file = document.getElementById("fileInput").files[0];
     const tag = document.getElementById("tagInput").value.trim();
-    if (!file || !tag) return alert("ファイルとタグを入力してください");
+    if (!file || !tag) return alert("ファイルと撮影場所を入力してください");
  
     if (file.size > 15 * 1024 * 1024) {
       return alert("画像サイズが大きすぎます。15MB以下の画像を選択してください。");
@@ -1012,7 +1063,6 @@
       const snapshot = await uploadBytes(storageRef, compressedBlob);
       const url = await getDownloadURL(snapshot.ref);
  
-      // 新規アップロード時は指定された8つのフィールドを正確に含める（ルール準拠）
       const newDocData = {
         file: url,
         tag: tag,
@@ -1039,38 +1089,32 @@
  
   document.getElementById("cancelReportBtn").onclick = () => hideModal(document.getElementById("reportModal"));
  
-  document.getElementById("submitFeedbackBtn").onclick = async () => {
-    const submitBtn = document.getElementById("submitFeedbackBtn");
-    const type = document.getElementById("feedbackTypeSelect").value;
-    const detail = document.getElementById("feedbackDetailInput").value.trim();
-    if (!detail) return alert("内容を入力してください。");
-
+  document.getElementById("submitReportBtn").onclick = async () => {
+    const submitBtn = document.getElementById("submitReportBtn");
+    const modal = document.getElementById("reportModal");
+    const selectedReason = document.querySelector('input[name="reportReason"]:checked');
+    if (!selectedReason) return alert("通報理由を選択してください。");
+ 
+    const detail = document.getElementById("reportDetailInput").value.trim();
+    const photoDocId = modal.dataset.photoDocId;
+    const photoFileUrl = modal.dataset.photoFileUrl;
+ 
     submitBtn.disabled = true;
     showSpinner();
     try {
-      // 1. 従来通り「feedback」コレクションに保存
-      await addDoc(collection(db, "feedback"), {
-        type: type,
+      await addDoc(collection(db, "reports"), {
+        photoDocId: photoDocId,
+        photoFileUrl: photoFileUrl,
+        reason: selectedReason.value,
         detail: detail,
-        reporterUid: currentAuthUser ? currentAuthUser.uid : null,
-        userAgent: navigator.userAgent,
+        reporterUid: auth.currentUser.uid,
         createdAt: new Date(),
         status: "open"
       });
-
-      // 2. メール送信用に「mail」コレクションに保存 (Trigger Email拡張機能がこれを検知して送信します)
-      await addDoc(collection(db, "mail"), {
-        to: "tochi.gk@gmail.com", // ★送信先のメールアドレス
-        message: {
-          subject: `【街フォト】新しいフィードバック（${type}）`,
-          text: `「街フォト」から新しいご意見・不具合報告が届きました。\n\n【種類】\n${type}\n\n【内容】\n${detail}\n\n【送信者UID】\n${currentAuthUser ? currentAuthUser.uid : '未ログイン（匿名）'}`
-        }
-      });
-
-      alert("送信しました。ご協力ありがとうございます！");
-      hideModal(document.getElementById("feedbackModal"));
+      alert("通報を受け付けました。ご協力ありがとうございます。");
+      hideModal(modal);
     } catch (e) {
-      alert("送信に失敗しました。\n" + e.message);
+      alert("通報の送信に失敗しました。\n" + e.message);
     } finally {
       hideSpinner();
       submitBtn.disabled = false;
@@ -1109,6 +1153,90 @@
     } finally {
       hideSpinner();
       submitBtn.disabled = false;
+    }
+  };
+
+  document.getElementById("closeAdminBtn").onclick = () => hideModal(document.getElementById("adminModal"));
+
+  document.getElementById("adminBtn").onclick = async () => {
+    showModal(document.getElementById("adminModal"));
+    const feedbackList = document.getElementById("adminFeedbackList");
+    const reportList = document.getElementById("adminReportList");
+    feedbackList.innerHTML = "読み込み中...";
+    reportList.innerHTML = "読み込み中...";
+
+    try {
+      const fQuery = query(collection(db, "feedback"), orderBy("createdAt", "desc"));
+      const fSnap = await getDocs(fQuery);
+      let fHtml = "";
+      fSnap.forEach(docSnap => {
+        const d = docSnap.data();
+        const date = d.createdAt ? d.createdAt.toDate().toLocaleString() : "不明";
+        fHtml += `<div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #fafafa;">
+          <div style="font-weight: bold; color: var(--main-blue); margin-bottom: 5px;">[${escapeHtml(d.type)}] ${date}</div>
+          <div style="white-space: pre-wrap; margin-bottom: 5px;">${escapeHtml(d.detail)}</div>
+          <div style="font-size: 0.8em; color: #888;">UID: ${d.reporterUid || "匿名"}</div>
+        </div>`;
+      });
+      feedbackList.innerHTML = fHtml || "現在フィードバックはありません。";
+
+      const rQuery = query(collection(db, "reports"), orderBy("createdAt", "desc"));
+      const rSnap = await getDocs(rQuery);
+      let rHtml = "";
+      rSnap.forEach(docSnap => {
+        const d = docSnap.data();
+        const date = d.createdAt ? d.createdAt.toDate().toLocaleString() : "不明";
+        rHtml += `<div style="border: 1px solid #ffcc80; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #fff8f0;" id="report-item-${docSnap.id}">
+          <div style="font-weight: bold; color: #ff5252; margin-bottom: 5px;">[${escapeHtml(d.reason)}] ${date}</div>
+          <div style="white-space: pre-wrap; margin-bottom: 5px;">詳細: ${escapeHtml(d.detail || "なし")}</div>
+          <div style="font-size: 0.8em; color: #888; margin-bottom: 5px;">通報者UID: ${d.reporterUid}</div>
+          <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
+            <a href="${escapeHtml(d.photoFileUrl)}" target="_blank" style="font-size: 0.9em; color: var(--main-blue); text-decoration: underline;">対象画像を確認</a>
+            <button class="action-btn danger-btn admin-delete-photo-btn" style="padding: 5px 10px; font-size: 0.8em;" data-photoid="${d.photoDocId}" data-fileurl="${d.photoFileUrl}" data-reportid="${docSnap.id}">🚨この画像を強制削除</button>
+          </div>
+        </div>`;
+      });
+      reportList.innerHTML = rHtml || "現在通報はありません。";
+
+      reportList.querySelectorAll(".admin-delete-photo-btn").forEach(btn => {
+        btn.onclick = async (e) => {
+          const photoId = e.target.dataset.photoid;
+          const fileUrl = e.target.dataset.fileurl;
+          const reportId = e.target.dataset.reportid;
+          
+          if(!photoId) return alert("画像データが見つかりません（既に削除されている可能性があります）");
+          if(!confirm("本当にこの画像を強制削除しますか？\n元に戻せません。")) return;
+
+          e.target.disabled = true;
+          e.target.textContent = "削除中...";
+
+          try {
+            if (fileUrl) {
+              try {
+                await deleteObject(ref(storage, fileUrl));
+              } catch (err) {
+                console.warn("ストレージ上の画像が見つかりません", err);
+              }
+            }
+            await deleteDoc(doc(db, "photos", photoId));
+            await deleteDoc(doc(db, "reports", reportId));
+            
+            images = images.filter(i => i.docId !== photoId);
+            alert("違反画像を強制削除しました。");
+            document.getElementById(`report-item-${reportId}`).style.display = "none";
+            renderGallery();
+          } catch(err) {
+            alert("削除に失敗しました: " + err.message);
+            e.target.disabled = false;
+            e.target.textContent = "🚨この画像を強制削除";
+          }
+        };
+      });
+
+    } catch (e) {
+      console.error(e);
+      feedbackList.innerHTML = "データの読み込みに失敗しました。";
+      reportList.innerHTML = "データの読み込みに失敗しました。";
     }
   };
 </script>
