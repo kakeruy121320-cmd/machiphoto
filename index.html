@@ -46,7 +46,6 @@
     #searchBox { padding: 10px 20px; width: 60%; min-width: 200px; border: 2px solid var(--main-blue); border-radius: 25px; font-size: 1em; outline: none; transition: border-color var(--transition-speed); }
     #searchBox:focus { border-color: var(--ピンク); }
     #sortSelect { padding: 10px 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 1em; outline: none; background: white; cursor: pointer; }
-    .bounded-mode-note { max-width: 600px; margin: 0 auto 10px; font-size: 0.75em; color: #999; }
     .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
     .tile-item { position: relative; width: 220px; background: var(--コンポーネント背景); border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s ease; will-change: transform; overflow: hidden; cursor: pointer; text-align: left; }
     .tile-item:hover { transform: scale(1.03) translateZ(0); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
@@ -161,10 +160,6 @@
     <span><span id="userFilterName">〇〇</span> さんの投稿を表示中</span>
     <button id="clearUserFilterBtn" class="action-btn gray-btn" style="padding: 5px 15px; font-size: 0.85em; margin-left:10px;">すべて表示</button>
   </div>
-
-  <p class="bounded-mode-note" id="boundedModeNote" style="display:none;">
-    ※検索中・高評価順の表示は、直近の投稿から最大300件を対象に表示しています。
-  </p>
  
   <div class="gallery"></div>
 </div>
@@ -184,7 +179,7 @@
       </div>
  
       <div class="danger-zone">
-        <p>⚠️ アカウントを削除すると、あなたが投稿した写真も含めすべてのデータが完全に削除され、元に戻せません。</p>
+        <p>⚠️️ アカウントを削除すると、あなたが投稿した写真も含めすべてのデータが完全に削除され、元に戻せません。</p>
         <button id="deleteAccountBtn" class="action-btn danger-btn">アカウントを削除する</button>
       </div>
     </div>
@@ -381,13 +376,10 @@
   };
  
   const PAGE_SIZE = 12;
-  const BOUNDED_FETCH_LIMIT = 300;
  
   let images = [];         
-  let displayCount = 12;   
   let lastVisibleDoc = null;
   let noMoreDocs = false;
-  let currentMode = "paginated"; 
   let isFetching = false;
   let filterUserId = null;
  
@@ -582,11 +574,40 @@
       reader.readAsDataURL(file);
     });
   }
- 
-  function getCurrentMode() {
+
+  // クエリを生成する共通関数
+  function buildPhotosQuery(isLoadMore = false) {
     const filter = document.getElementById("searchBox").value.trim();
     const sortMode = document.getElementById("sortSelect").value;
-    return (filter === "" && sortMode === "newest") ? "paginated" : "bounded";
+    
+    let q = collection(db, "photos");
+    let queryConstraints = [];
+
+    if (filterUserId) {
+      queryConstraints.push(where("userId", "==", filterUserId));
+    }
+
+    if (filter !== "") {
+      queryConstraints.push(where("tag", ">=", filter));
+      queryConstraints.push(where("tag", "<=", filter + '\uf8ff'));
+    }
+
+    if (sortMode === "popular") {
+      queryConstraints.push(orderBy("likeCount", "desc"));
+      queryConstraints.push(orderBy("createdAt", "desc"));
+    } else {
+      if (filter !== "") {
+        queryConstraints.push(orderBy("tag")); 
+      }
+      queryConstraints.push(orderBy("createdAt", "desc"));
+    }
+
+    if (isLoadMore && lastVisibleDoc) {
+      queryConstraints.push(startAfter(lastVisibleDoc));
+    }
+    queryConstraints.push(limit(PAGE_SIZE));
+
+    return query(q, ...queryConstraints);
   }
  
   async function loadInitialPhotos() {
@@ -596,26 +617,18 @@
     images = [];
     lastVisibleDoc = null;
     noMoreDocs = false;
-    displayCount = PAGE_SIZE;
-    currentMode = getCurrentMode();
-    document.getElementById("boundedModeNote").style.display = (currentMode === "bounded") ? "block" : "none";
  
     try {
-      if (currentMode === "paginated") {
-        const q = query(collection(db, "photos"), orderBy("createdAt", "desc"), limit(PAGE_SIZE));
-        const snap = await getDocs(q);
-        snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
-        lastVisibleDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
-        if (snap.docs.length < PAGE_SIZE) noMoreDocs = true;
-      } else {
-        const q = query(collection(db, "photos"), orderBy("createdAt", "desc"), limit(BOUNDED_FETCH_LIMIT));
-        const snap = await getDocs(q);
-        snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
-        noMoreDocs = true; 
-      }
+      const q = buildPhotosQuery(false);
+      const snap = await getDocs(q);
+      
+      snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
+      lastVisibleDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+      if (snap.docs.length < PAGE_SIZE) noMoreDocs = true;
+      
       renderGallery();
     } catch (e) {
-      document.querySelector(".gallery").innerHTML = "<p>写真の取得に失敗しました。</p>";
+      document.querySelector(".gallery").innerHTML = "<p>写真の取得に失敗しました。<br><span style='font-size:0.8em;'>※初回はインデックス作成が必要な場合があります（コンソールを確認してください）。</span></p>";
       console.error(e);
     } finally {
       hideSpinner();
@@ -625,68 +638,43 @@
  
   async function loadMorePhotosIfNeeded() {
     if (isFetching || noMoreDocs) return;
-    if (currentMode === "paginated") {
-      isFetching = true;
-      try {
-        const q = query(collection(db, "photos"), orderBy("createdAt", "desc"), startAfter(lastVisibleDoc), limit(PAGE_SIZE));
-        const snap = await getDocs(q);
-        snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
-        lastVisibleDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : lastVisibleDoc;
-        if (snap.docs.length < PAGE_SIZE) noMoreDocs = true;
-        renderGallery();
-      } catch (e) {
-        console.error(e);
-      } finally {
-        isFetching = false;
+    isFetching = true;
+    try {
+      const q = buildPhotosQuery(true);
+      const snap = await getDocs(q);
+      
+      snap.forEach(docSnap => images.push({ ...docSnap.data(), docId: docSnap.id }));
+      if (snap.docs.length > 0) {
+        lastVisibleDoc = snap.docs[snap.docs.length - 1];
       }
-    } else {
-      displayCount += PAGE_SIZE;
+      if (snap.docs.length < PAGE_SIZE) noMoreDocs = true;
+      
       renderGallery();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      isFetching = false;
     }
   }
  
   function renderGallery() {
-    const filter = document.getElementById("searchBox").value;
-    const sortMode = document.getElementById("sortSelect").value;
     const gallery = document.querySelector(".gallery");
     gallery.innerHTML = "";
-    let filtered = images.filter(img => (img.tag || "").includes(filter));
  
-    if (filterUserId) {
-      filtered = filtered.filter(img => img.userId === filterUserId);
-    }
-
-    if (sortMode === "popular") {
-      filtered.sort((a, b) => {
-        const likesA = a.likes ? a.likes.length : 0;
-        const likesB = b.likes ? b.likes.length : 0;
-        return likesB - likesA;
-      });
-    } else {
-      filtered.sort((a, b) => {
-        const getTime = (dateObj) => {
-          if (!dateObj) return 0;
-          if (typeof dateObj.toMillis === "function") return dateObj.toMillis();
-          if (dateObj instanceof Date) return dateObj.getTime();
-          return 0;
-        };
-        return getTime(b.createdAt) - getTime(a.createdAt);
-      });
-    }
- 
-    if (filtered.length === 0) {
+    if (images.length === 0) {
       gallery.innerHTML = "<p>写真がありません。</p>";
       return;
     }
  
-    const itemsToShow = currentMode === "paginated" ? filtered : filtered.slice(0, displayCount);
     const fragment = document.createDocumentFragment();
  
-    itemsToShow.forEach(img => {
+    images.forEach(img => {
       const item = document.createElement("div");
       item.className = "tile-item";
       const isOwner = currentAuthUser && currentAuthUser.uid === img.userId;
-      const likesCount = img.likes ? img.likes.length : 0;
+      
+      // likeCountフィールドがあれば優先、なければ配列の長さから計算
+      const likesCount = img.likeCount !== undefined ? img.likeCount : (img.likes ? img.likes.length : 0);
       const downloadsCount = img.downloads || 0;
       const hasLiked = currentAuthUser && img.likes && img.likes.includes(currentAuthUser.uid);
       const heartClass = hasLiked ? "active" : "inactive";
@@ -707,8 +695,8 @@
         </div>
         <div class="img-wrapper skeleton">
           <img src="${fileUrl}" alt="${tagText}" class="thumb" loading="lazy"
-               onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');"
-               onerror="this.parentElement.classList.remove('skeleton'); this.parentElement.classList.add('load-error'); this.style.display='none';">
+                onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');"
+                onerror="this.parentElement.classList.remove('skeleton'); this.parentElement.classList.add('load-error'); this.style.display='none';">
         </div>
         <div class="info">
           <span class="tag">#${tagText}</span>
@@ -739,7 +727,7 @@
         document.getElementById("userFilterName").textContent = targetName;
         document.getElementById("userFilterNotice").style.display = "flex";
         
-        renderGallery();
+        loadInitialPhotos();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       };
 
@@ -761,11 +749,23 @@
         try {
           const target = images.find(i => i.docId === docId);
           if (hasLiked) {
-            await updateDoc(photoRef, { likes: arrayRemove(currentAuthUser.uid) });
-            if (target) target.likes = (target.likes || []).filter(u => u !== currentAuthUser.uid);
+            await updateDoc(photoRef, { 
+              likes: arrayRemove(currentAuthUser.uid),
+              likeCount: increment(-1) 
+            });
+            if (target) {
+              target.likes = (target.likes || []).filter(u => u !== currentAuthUser.uid);
+              target.likeCount = (target.likeCount || 1) - 1;
+            }
           } else {
-            await updateDoc(photoRef, { likes: arrayUnion(currentAuthUser.uid) });
-            if (target) target.likes = [...(target.likes || []), currentAuthUser.uid];
+            await updateDoc(photoRef, { 
+              likes: arrayUnion(currentAuthUser.uid),
+              likeCount: increment(1) 
+            });
+            if (target) {
+              target.likes = [...(target.likes || []), currentAuthUser.uid];
+              target.likeCount = (target.likeCount || 0) + 1;
+            }
           }
           renderGallery();
         } catch (error) { console.error(error); }
@@ -835,7 +835,7 @@
   document.getElementById("clearUserFilterBtn").onclick = () => {
     filterUserId = null;
     document.getElementById("userFilterNotice").style.display = "none";
-    renderGallery();
+    loadInitialPhotos();
   };
 
   document.getElementById("profileSettingsBtn").onclick = () => {
@@ -1071,13 +1071,12 @@
         userIcon: currentUserProfile.iconUrl,
         createdAt: new Date(),
         likes: [],
+        likeCount: 0,
         downloads: 0
       };
       const newDocRef = await addDoc(collection(db, "photos"), newDocData);
  
-      if (currentMode === "paginated") {
-        images.unshift({ ...newDocData, docId: newDocRef.id });
-      }
+      images.unshift({ ...newDocData, docId: newDocRef.id });
  
       alert("アップロード成功！");
       document.getElementById("fileInput").value = "";
