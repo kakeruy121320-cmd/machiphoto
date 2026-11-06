@@ -366,7 +366,8 @@ if (!isInAppBrowser()) {
   $("signInBtnUnauthorized").onclick = () => { agreedToTerms ? doSignIn() : showModal($("termsModal")); };
 }
 $("signOutBtnAuthorized").onclick = () => { showSpinner(); signOut(auth).finally(hideSpinner); };
-
+const initialQuery = new URLSearchParams(location.search).get("q");
+if (initialQuery) $("searchBox").value = initialQuery.slice(0, 30);
 onAuthStateChanged(auth, async user => {
   if (user) {
     currentAuthUser = user;
